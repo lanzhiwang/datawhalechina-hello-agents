@@ -22,7 +22,9 @@ def should_stream(streaming: bool = None) -> bool:
     return streaming
 
 
-def stream_response(llm: HelloAgentsLLM, messages: List[dict], silent: bool = False) -> str:
+def stream_response(
+    llm: HelloAgentsLLM, messages: List[dict], silent: bool = False
+) -> str:
     """
     执行流式 LLM 调用并打印结果
 
@@ -43,7 +45,7 @@ def stream_response(llm: HelloAgentsLLM, messages: List[dict], silent: bool = Fa
             if len(chunk) > previous_length:
                 new_content = chunk[previous_length:]
                 if not silent:
-                    print(new_content, end='', flush=True)
+                    print(new_content, end="", flush=True)
                 previous_length = len(chunk)
 
             # 保存完整响应

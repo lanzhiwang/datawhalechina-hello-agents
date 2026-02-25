@@ -21,15 +21,16 @@ mcp = FastMCP("MyCustomServer")
 
 # ==================== 数学工具 ====================
 
+
 @mcp.tool()
 def add(a: float, b: float) -> float:
     """
     加法计算器
-    
+
     Args:
         a: 第一个数字
         b: 第二个数字
-    
+
     Returns:
         两数之和
     """
@@ -40,11 +41,11 @@ def add(a: float, b: float) -> float:
 def subtract(a: float, b: float) -> float:
     """
     减法计算器
-    
+
     Args:
         a: 被减数
         b: 减数
-    
+
     Returns:
         两数之差
     """
@@ -55,11 +56,11 @@ def subtract(a: float, b: float) -> float:
 def multiply(a: float, b: float) -> float:
     """
     乘法计算器
-    
+
     Args:
         a: 第一个数字
         b: 第二个数字
-    
+
     Returns:
         两数之积
     """
@@ -70,14 +71,14 @@ def multiply(a: float, b: float) -> float:
 def divide(a: float, b: float) -> float:
     """
     除法计算器
-    
+
     Args:
         a: 被除数
         b: 除数
-    
+
     Returns:
         两数之商
-    
+
     Raises:
         ValueError: 当除数为0时
     """
@@ -88,14 +89,15 @@ def divide(a: float, b: float) -> float:
 
 # ==================== 文本处理工具 ====================
 
+
 @mcp.tool()
 def reverse_text(text: str) -> str:
     """
     反转文本
-    
+
     Args:
         text: 要反转的文本
-    
+
     Returns:
         反转后的文本
     """
@@ -106,10 +108,10 @@ def reverse_text(text: str) -> str:
 def count_words(text: str) -> int:
     """
     统计文本中的单词数量
-    
+
     Args:
         text: 要统计的文本
-    
+
     Returns:
         单词数量
     """
@@ -120,10 +122,10 @@ def count_words(text: str) -> int:
 def to_uppercase(text: str) -> str:
     """
     将文本转换为大写
-    
+
     Args:
         text: 要转换的文本
-    
+
     Returns:
         大写文本
     """
@@ -134,10 +136,10 @@ def to_uppercase(text: str) -> str:
 def to_lowercase(text: str) -> str:
     """
     将文本转换为小写
-    
+
     Args:
         text: 要转换的文本
-    
+
     Returns:
         小写文本
     """
@@ -146,20 +148,22 @@ def to_lowercase(text: str) -> str:
 
 # ==================== 资源定义 ====================
 
+
 @mcp.resource("config://server")
 def get_server_config() -> str:
     """
     获取服务器配置信息
-    
+
     Returns:
         服务器配置的JSON字符串
     """
     import json
+
     config = {
         "name": "MyCustomServer",
         "version": "1.0.0",
         "tools_count": 8,
-        "description": "自定义MCP服务器示例"
+        "description": "自定义MCP服务器示例",
     }
     return json.dumps(config, ensure_ascii=False, indent=2)
 
@@ -168,7 +172,7 @@ def get_server_config() -> str:
 def get_capabilities() -> str:
     """
     获取服务器能力列表
-    
+
     Returns:
         能力列表的文本描述
     """
@@ -196,11 +200,12 @@ def get_capabilities() -> str:
 
 # ==================== 提示词模板 ====================
 
+
 @mcp.prompt()
 def math_helper() -> str:
     """
     数学计算助手提示词
-    
+
     Returns:
         提示词模板
     """
@@ -217,7 +222,7 @@ def math_helper() -> str:
 def text_processor() -> str:
     """
     文本处理助手提示词
-    
+
     Returns:
         提示词模板
     """
@@ -236,4 +241,3 @@ if __name__ == "__main__":
     # 运行MCP服务器
     # FastMCP会自动处理stdio传输
     mcp.run()
-

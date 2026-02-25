@@ -17,23 +17,17 @@ agent = SimpleAgent(name="TestAgent", llm=llm)
 # 2. 加载数据集
 dataset = BFCLDataset(
     bfcl_data_dir="./temp_gorilla/berkeley-function-call-leaderboard/bfcl_eval/data",
-    category="simple_python"
+    category="simple_python",
 )
 data = dataset.load()
 
 print(f"✅ 加载了 {len(data)} 个测试样本")
 
 # 3. 创建评估器
-evaluator = BFCLEvaluator(
-    dataset=dataset,
-    category="simple_python"
-)
+evaluator = BFCLEvaluator(dataset=dataset, category="simple_python")
 
 # 4. 运行评估
-results = evaluator.evaluate(
-    agent=agent,
-    max_samples=5  # 只评估5个样本
-)
+results = evaluator.evaluate(agent=agent, max_samples=5)  # 只评估5个样本
 
 # 5. 查看详细结果
 print(f"\n评估结果:")
@@ -43,7 +37,7 @@ print(f"准确率: {results['overall_accuracy']:.2%}")
 
 # 6. 查看每个样本的详细结果
 print(f"\n详细结果:")
-for detail in results['detailed_results']:
+for detail in results["detailed_results"]:
     print(f"样本 {detail['sample_id']}:")
     print(f"  问题: {detail['question'][:50]}...")
     print(f"  预测: {detail['predicted']}")
@@ -53,9 +47,7 @@ for detail in results['detailed_results']:
 
 # 7. 导出结果
 evaluator.export_results(
-    results,
-    output_file="./evaluation_results/bfcl_custom_result.json"
+    results, output_file="./evaluation_results/bfcl_custom_result.json"
 )
 
 print("✅ 结果已导出到 ./evaluation_results/bfcl_custom_result.json")
-

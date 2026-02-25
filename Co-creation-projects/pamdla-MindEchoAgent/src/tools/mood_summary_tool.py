@@ -2,11 +2,12 @@
 
 from hello_agents.tools import Tool as BaseTool
 
+
 class MoodSummaryTool(BaseTool):
     def __init__(self):
         super().__init__(
             name="mood_summary_tool",
-            description="生成长期记忆的心境总结模板（LLM生成最终内容）"
+            description="生成长期记忆的心境总结模板（LLM生成最终内容）",
         )
         self.name = "mood_summary_tool"
         self.description = "生成长期记忆的心境总结模板（LLM生成最终内容）"
@@ -14,10 +15,8 @@ class MoodSummaryTool(BaseTool):
     def get_parameters(self):
         return {
             "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "用户输入"}
-            },
-            "required": ["query"]
+            "properties": {"query": {"type": "string", "description": "用户输入"}},
+            "required": ["query"],
         }
 
     def run(self, query: str) -> str:

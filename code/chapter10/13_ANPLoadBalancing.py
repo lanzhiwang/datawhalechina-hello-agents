@@ -13,8 +13,9 @@ for i in range(5):
         service_type="api",
         capabilities=["rest_api"],
         endpoint=f"http://api{i}:8000",
-        metadata={"load": random.uniform(0.1, 0.9)}
+        metadata={"load": random.uniform(0.1, 0.9)},
     )
+
 
 # 负载均衡函数
 def get_best_server():
@@ -25,6 +26,7 @@ def get_best_server():
 
     best = min(servers, key=lambda s: s.metadata.get("load", 1.0))
     return best
+
 
 # 模拟请求分配
 for i in range(10):

@@ -360,9 +360,10 @@ Level 2 结构（小节）：
 Level 3 结构（细节）：
 1. 具体说明（100-150字）：深入某个特定点
 2. 示例或补充（100-150字）：代码片段或实例
-        """
+        """,
     }
     return requirements.get(level, requirements[3])
+
 
 def get_react_writer_prompt() -> str:
     """
@@ -380,12 +381,12 @@ def get_revision_prompt() -> str:
     """获取修改提示词"""
     return REVISION_PROMPT
 
+
 def get_planner_prompts() -> dict:
     """获取 PlanAndSolveAgent 所需的提示词"""
     # PlanAndSolveAgent 只需要一个主提示词
-    return {
-        "main_prompt": PLANNER_PROMPT
-    }
+    return {"main_prompt": PLANNER_PROMPT}
+
 
 REFLECTION_PROMPTS = {
     "self_reflect_prompt": """
@@ -438,10 +439,10 @@ Next Steps:
 4.  **完整输出**：提供优化后的完整文章内容。
 
 请输出优化后的最终文章：
-"""
+""",
 }
+
 
 def get_reflection_writer_prompts() -> dict:
     """获取 ReflectionAgent 所需的提示词"""
     return REFLECTION_PROMPTS
-

@@ -88,7 +88,9 @@ class ToolCallTracker:
     # ------------------------------------------------------------------
     # Draining helpers
     # ------------------------------------------------------------------
-    def drain(self, state: SummaryState, *, step: Optional[int] = None) -> list[dict[str, Any]]:
+    def drain(
+        self, state: SummaryState, *, step: Optional[int] = None
+    ) -> list[dict[str, Any]]:
         """提取尚未消费的工具调用事件，并同步任务的 note_id。"""
 
         with self._lock:
@@ -142,7 +144,9 @@ class ToolCallTracker:
 
         self._event_sink = sink
 
-    def _build_payload(self, event: ToolCallEvent, step: Optional[int]) -> dict[str, Any]:
+    def _build_payload(
+        self, event: ToolCallEvent, step: Optional[int]
+    ) -> dict[str, Any]:
         payload = {
             "type": "tool_call",
             "event_id": event.id,
@@ -163,7 +167,9 @@ class ToolCallTracker:
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
-    def _attach_note_to_task(self, tasks: list[TodoItem], task_id: int, note_id: str) -> None:
+    def _attach_note_to_task(
+        self, tasks: list[TodoItem], task_id: int, note_id: str
+    ) -> None:
         """Update matching TODO item with note metadata."""
 
         for task in tasks:

@@ -2,6 +2,7 @@ import subprocess
 import shlex
 import os
 
+
 class TerminalTool:
     name = "terminal_exec"
     description = "执行终端命令查看目录、文件和系统信息（支持：pwd, ls, cat, echo, whoami, date等）"
@@ -9,12 +10,12 @@ class TerminalTool:
     def __init__(self, security_mode="strict"):
         """
         初始化终端工具
-        
+
         Args:
             security_mode: "strict"（严格模式，直接拒绝） 或 "warning"（警告模式，给出提示）
         """
         self.security_mode = security_mode
-        
+
         # 扩展的白名单命令列表（无参数或安全参数的命令）
         self.allowed_commands = {
             "ls": [],  # ls 可以带参数如 -l, -a
@@ -38,28 +39,53 @@ class TerminalTool:
             "du": ["-h", "-s"],  # 磁盘使用情况
             "df": ["-h"],  # 文件系统信息
         }
-        
+
         # 危险关键词，用于额外安全检查
         self.dangerous_keywords = [
-            "rm", "delete", "del", "format", "mkfs",
-            "sudo", "su", "passwd", "chmod", "chown",
-            "dd", "mkfs", "fdisk", ">", ">>", "|",
-            ";", "&&", "||", "`", "$(", "eval"
+            "rm",
+            "delete",
+            "del",
+            "format",
+            "mkfs",
+            "sudo",
+            "su",
+            "passwd",
+            "chmod",
+            "chown",
+            "dd",
+            "mkfs",
+            "fdisk",
+            ">",
+            ">>",
+            "|",
+            ";",
+            "&&",
+            "||",
+            "`",
+            "$(",
+            "eval",
         ]
 
     def get_parameters(self):
         return {
             "input": {
-                "type": "str", 
-                "description": "输入终端命令，如：pwd, ls -la, cat filename.txt", 
+                "type": "str",
+                "description": "输入终端命令，如：pwd, ls -la, cat filename.txt",
                 "required": True,
-                "examples": ["pwd", "ls -la", "cat README.md", "echo hello", "whoami", "date"]
+                "examples": [
+                    "pwd",
+                    "ls -la",
+                    "cat README.md",
+                    "echo hello",
+                    "whoami",
+                    "date",
+                ],
             }
         }
 
     def _check_command_safety(self, cmd):
         """检查命令安全性
-        
+
         Returns:
             tuple: (is_safe, error_msg, warning_msg)
                 is_safe: bool - 是否安全
@@ -73,7 +99,7 @@ class TerminalTool:
                 error_msg = f"检测到不安全的操作：{keyword}"
                 warning_msg = f"⚠️ 警告：此命令包含 '{keyword}' 操作，可能导致系统损坏或数据丢失！"
                 return False, error_msg, warning_msg
-        
+
         # 检查是否包含管道、重定向等操作
         operators = ["|", ">", "<", "&", "&&", "||", ";"]
         for op in operators:
@@ -81,7 +107,7 @@ class TerminalTool:
                 error_msg = f"检测到不安全的操作符：{op}"
                 warning_msg = f"⚠️ 警告：此命令包含 '{op}' 操作符，可能导致意外行为！"
                 return False, error_msg, warning_msg
-        
+
         return True, None, None
 
     def run(self, parameters):
@@ -93,10 +119,10 @@ class TerminalTool:
             cmd = str(parameters) if parameters else ""
 
         cmd = cmd.strip() if cmd else ""
-        
+
         if not cmd:
             return "错误: 命令不能为空"
-        
+
         # 安全检查
         is_safe, error_msg, warning_msg = self._check_command_safety(cmd)
         if not is_safe:
@@ -104,15 +130,15 @@ class TerminalTool:
                 return f"🚫 安全拒绝: {error_msg}"
             else:  # warning mode
                 return f"{warning_msg}\n\n命令: {cmd}\n\n如需继续执行，请确认操作的安全性。\n(当前为警告模式，尚未真正执行)"
-        
+
         # 分割命令和参数
         parts = shlex.split(cmd)
         if not parts:
             return "错误: 无效的命令"
-        
+
         command_name = parts[0]
         args = parts[1:] if len(parts) > 1 else []
-        
+
         # 检查命令是否在白名单中
         if command_name not in self.allowed_commands:
             allowed_list = ", ".join(sorted(self.allowed_commands.keys()))
@@ -123,22 +149,22 @@ class TerminalTool:
                 error_msg += f"\n💡 您是否想使用: {', '.join(similar_commands)}?"
             error_msg += f"\n\n📖 输入 'help' 或 '?' 查看命令帮助"
             return error_msg
-        
+
         # 检查参数
         allowed_args = self.allowed_commands[command_name]
-        
+
         # 改进的参数验证逻辑
         if "*" not in allowed_args and args:
             validation_result = self._validate_parameters(command_name, args)
             if not validation_result[0]:  # 验证失败
                 return validation_result[1]
-        
+
         # 如果允许任何参数，进行基本安全检查
         elif "*" in allowed_args and args:
             validation_result = self._validate_wildcard_args(command_name, args)
             if not validation_result[0]:  # 验证失败
                 return validation_result[1]
-        
+
         # 执行命令（使用 shell=False 提高安全性）
         try:
             # 使用 shlex.split 可以正确处理带引号的参数
@@ -148,62 +174,64 @@ class TerminalTool:
                 capture_output=True,
                 text=True,
                 timeout=15,
-                cwd=None  # 限制在安全目录执行
+                cwd=None,  # 限制在安全目录执行
             )
-            
+
             # 组合标准输出和标准错误
             output = result.stdout
             if result.stderr:
                 output += f"\n[标准错误]\n{result.stderr}"
-            
+
             # 返回执行结果
             if result.returncode == 0:
                 return output.strip() if output.strip() else "命令执行成功（无输出）"
             else:
                 return f"命令执行失败 (返回码: {result.returncode})\n{output.strip()}"
-                
+
         except subprocess.TimeoutExpired:
             return "命令执行超时（超过15秒）。"
         except subprocess.CalledProcessError as e:
-            error_output = e.stderr.decode() if isinstance(e.stderr, bytes) else e.stderr
+            error_output = (
+                e.stderr.decode() if isinstance(e.stderr, bytes) else e.stderr
+            )
             return f"命令执行错误: {error_output or str(e)}"
         except Exception as e:
             return f"执行异常: {str(e)}"
 
     def _validate_parameters(self, command_name, args):
         """验证特定命令的参数
-        
+
         Args:
             command_name: 命令名称
             args: 参数列表
-            
+
         Returns:
             tuple: (is_valid, error_message)
         """
         allowed_args = self.allowed_commands[command_name]
-        
+
         # 验证选项参数
         option_args = [arg for arg in args if arg.startswith("-")]
         for arg in option_args:
             if arg not in allowed_args and arg != "-p":  # -p 是特殊的，允许mkdir使用
                 help_text = self._get_command_help(command_name)
                 return False, f"参数 '{arg}' 不被允许。\n{help_text}"
-        
+
         # 验证非选项参数（通常是文件路径）
         file_args = [arg for arg in args if not arg.startswith("-")]
         for arg in file_args:
             if self._is_dangerous_path(arg):
                 return False, f"危险路径: {arg}\n只允许访问当前目录及其子目录"
-        
+
         return True, None
 
     def _validate_wildcard_args(self, command_name, args):
         """验证通配符参数（适用于cat、echo等）
-        
+
         Args:
             command_name: 命令名称
             args: 参数列表
-            
+
         Returns:
             tuple: (is_valid, error_message)
         """
@@ -212,36 +240,45 @@ class TerminalTool:
             for arg in args:
                 if not arg.startswith("-") and self._is_dangerous_path(arg):
                     return False, f"危险路径: {arg}\n只允许访问当前目录及其子目录"
-        
+
         return True, None
 
     def _is_dangerous_path(self, path):
         """检查路径是否危险
-        
+
         Args:
             path: 要检查的路径
-            
+
         Returns:
             bool: 是否为危险路径
         """
         # 检查绝对路径
         if os.path.isabs(path):
             return True
-        
+
         # 检查包含危险字符的路径
-        dangerous_patterns = ["../", "..\\", "~/", "/etc", "/bin", "/usr", "/var", "/sys"]
+        dangerous_patterns = [
+            "../",
+            "..\\",
+            "~/",
+            "/etc",
+            "/bin",
+            "/usr",
+            "/var",
+            "/sys",
+        ]
         for pattern in dangerous_patterns:
             if pattern in path:
                 return True
-        
+
         return False
 
     def _get_command_help(self, command_name):
         """返回命令的使用帮助
-        
+
         Args:
             command_name: 命令名称
-            
+
         Returns:
             str: 帮助信息
         """
@@ -264,25 +301,27 @@ class TerminalTool:
             "which": "用法: which <命令>\n功能: 查找命令位置",
             "whereis": "用法: whereis <程序>\n功能: 查找程序位置",
             "du": "用法: du [-hs] [路径]\n功能: 显示磁盘使用情况\n选项: -h(人类可读), -s(总计)",
-            "df": "用法: df [-h]\n功能: 显示文件系统信息\n选项: -h(人类可读)"
+            "df": "用法: df [-h]\n功能: 显示文件系统信息\n选项: -h(人类可读)",
         }
         return help_text.get(command_name, f"命令 '{command_name}' 暂无帮助信息")
 
     def _find_similar_commands(self, command_name):
         """查找相似的命令名称
-        
+
         Args:
             command_name: 输入的命令名称
-            
+
         Returns:
             list: 相似命令列表
         """
         import difflib
-        
+
         # 获取所有允许的命令
         allowed_commands = list(self.allowed_commands.keys())
-        
+
         # 使用difflib查找相似命令
-        similar = difflib.get_close_matches(command_name, allowed_commands, n=3, cutoff=0.6)
-        
+        similar = difflib.get_close_matches(
+            command_name, allowed_commands, n=3, cutoff=0.6
+        )
+
         return similar

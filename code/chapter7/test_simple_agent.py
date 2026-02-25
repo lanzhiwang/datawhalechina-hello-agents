@@ -15,7 +15,7 @@ print("=== 测试1：基础对话 ===")
 basic_agent = MySimpleAgent(
     name="基础助手",
     llm=llm,
-    system_prompt="你是一个友好的AI助手，请用简洁明了的方式回答问题。"
+    system_prompt="你是一个友好的AI助手，请用简洁明了的方式回答问题。",
 )
 
 response1 = basic_agent.run("你好，请介绍一下自己")
@@ -32,7 +32,7 @@ enhanced_agent = MySimpleAgent(
     llm=llm,
     system_prompt="你是一个智能助手，可以使用工具来帮助用户。",
     tool_registry=tool_registry,
-    enable_tool_calling=True
+    enable_tool_calling=True,
 )
 
 response2 = enhanced_agent.run("请帮我计算 15 * 8 + 32")

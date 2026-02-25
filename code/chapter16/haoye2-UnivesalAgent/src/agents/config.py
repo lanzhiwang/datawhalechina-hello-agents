@@ -10,7 +10,7 @@
 #   - "strict" : 严格模式，危险命令直接拒绝执行（推荐用于生产环境）
 #   - "warning": 警告模式，危险命令给出警告提示（适合开发调试）
 TERMINAL_SECURITY_MODE = "strict"
-#TERMINAL_SECURITY_MODE = "warning"
+# TERMINAL_SECURITY_MODE = "warning"
 # ==================== 网页搜索工具配置 ====================
 
 # 搜索结果的默认返回数量

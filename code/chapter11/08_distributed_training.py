@@ -27,28 +27,31 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "HelloAgents"))
 from hello_agents.tools import RLTrainingTool
 import json
 
+
 def main():
-    print("="*80)
+    print("=" * 80)
     print("分布式训练示例")
-    print("="*80)
-    
+    print("=" * 80)
+
     # 检测分布式环境
     world_size = int(os.environ.get("WORLD_SIZE", 1))
     local_rank = int(os.environ.get("LOCAL_RANK", 0))
-    
+
     if world_size > 1:
         print(f"\n🚀 分布式训练模式")
         print(f"   - 总进程数: {world_size}")
         print(f"   - 当前进程: {local_rank}")
-        print(f"   - 分布式后端: {os.environ.get('ACCELERATE_DISTRIBUTED_TYPE', 'MULTI_GPU')}")
+        print(
+            f"   - 分布式后端: {os.environ.get('ACCELERATE_DISTRIBUTED_TYPE', 'MULTI_GPU')}"
+        )
     else:
         print(f"\n💻 单GPU训练模式")
-    
-    print("="*80)
-    
+
+    print("=" * 80)
+
     # 创建训练工具
     rl_tool = RLTrainingTool()
-    
+
     # 训练配置
     # 注意: batch_size是每个GPU的batch size
     # 总batch size = batch_size × num_gpus × gradient_accumulation_steps
@@ -64,7 +67,7 @@ def main():
         "use_wandb": False,
         "use_tensorboard": True,
     }
-    
+
     # 只在主进程打印配置
     if local_rank == 0:
         print("\n训练配置:")
@@ -73,25 +76,25 @@ def main():
         print(f"  - Epoch数: {config['num_epochs']}")
         print(f"  - 每GPU batch size: {config['batch_size']}")
         if world_size > 1:
-            total_batch = config['batch_size'] * world_size
+            total_batch = config["batch_size"] * world_size
             print(f"  - 总batch size: {total_batch}")
-        print("="*80)
-    
+        print("=" * 80)
+
     # 开始训练
     # 训练代码完全不需要修改!
     # Accelerate会自动处理分布式训练的所有细节
     result = rl_tool.run(config)
-    
+
     # 只在主进程打印结果
     if local_rank == 0:
         result_data = json.loads(result)
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("训练完成!")
-        print("="*80)
+        print("=" * 80)
         print(f"状态: {result_data['status']}")
         print(f"模型路径: {result_data['output_dir']}")
-        print("="*80)
-        
+        print("=" * 80)
+
         # 打印性能提示
         if world_size > 1:
             print(f"\n💡 性能提示:")
@@ -99,6 +102,6 @@ def main():
             print(f"   理论加速比: ~{world_size * 0.85:.1f}x")
             print(f"   (实际加速比取决于通信开销和数据加载)")
 
+
 if __name__ == "__main__":
     main()
-

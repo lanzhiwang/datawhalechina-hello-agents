@@ -11,12 +11,12 @@ LLM_API_KEY = os.getenv("LLM_API_KEY")
 LLM_BASE_URL = os.getenv("LLM_BASE_URL")
 LLM_MODEL = os.getenv("LLM_MODEL")
 
-#创建模型,在这里以Qwen为例,调用的百炼大模型平台API
+# 创建模型,在这里以Qwen为例,调用的百炼大模型平台API
 model = ModelFactory.create(
     model_platform=ModelPlatformType.QWEN,
     model_type=LLM_MODEL,
     url=LLM_BASE_URL,
-    api_key=LLM_API_KEY
+    api_key=LLM_API_KEY,
 )
 
 # 定义协作任务
@@ -34,10 +34,10 @@ print(Fore.YELLOW + f"协作任务:\n{task_prompt}\n")
 
 # 初始化角色扮演会话
 role_play_session = RolePlaying(
-    assistant_role_name="心理学家", 
-    user_role_name="作家", 
+    assistant_role_name="心理学家",
+    user_role_name="作家",
     task_prompt=task_prompt,
-    model=model
+    model=model,
 )
 
 print(Fore.CYAN + f"具体任务描述:\n{role_play_session.task_prompt}\n")
@@ -49,15 +49,15 @@ input_msg = role_play_session.init_chat()
 while n < chat_turn_limit:
     n += 1
     assistant_response, user_response = role_play_session.step(input_msg)
-    
+
     print_text_animated(Fore.BLUE + f"作家:\n\n{user_response.msg.content}\n")
     print_text_animated(Fore.GREEN + f"心理学家:\n\n{assistant_response.msg.content}\n")
-    
+
     # 检查任务完成标志
     if "CAMEL_TASK_DONE" in user_response.msg.content:
         print(Fore.MAGENTA + "✅ 电子书创作完成！")
         break
-    
+
     input_msg = assistant_response.msg
 
 print(Fore.YELLOW + f"总共进行了 {n} 轮协作对话")

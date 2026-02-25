@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 from hello_agents import SimpleAgent, HelloAgentsLLM
 from hello_agents.tools import NoteTool
@@ -27,8 +28,12 @@ class OutlineAgent(SimpleAgent):
     def _ensure_tool(self, novel_id: str, title: str = None):
         if not self.note_tools.get(novel_id):
             if not title:
-                raise ValueError(f"Tool for novel_id {novel_id} not initialized and title not provided.")
-            self.note_tools[novel_id] = NoteTool(workspace=os.path.join(self.workspace, f"{title}-{novel_id}", 'outline'))
+                raise ValueError(
+                    f"Tool for novel_id {novel_id} not initialized and title not provided."
+                )
+            self.note_tools[novel_id] = NoteTool(
+                workspace=os.path.join(self.workspace, f"{title}-{novel_id}", "outline")
+            )
 
     def run(self, user_input: str, **kwargs) -> str:
         """运行 Agent"""
@@ -46,8 +51,8 @@ class OutlineAgent(SimpleAgent):
         context = OUTLINE_PROMPT.format(
             user_input=user_input,
             title=title or "无",
-            tags='，'.join([str(tag) for tag in kwargs.values() if tag]) or '无',
-            target_length=target_length
+            tags="，".join([str(tag) for tag in kwargs.values() if tag]) or "无",
+            target_length=target_length,
         )
 
         # 2. 使用上下文调用 LLM
@@ -55,45 +60,40 @@ class OutlineAgent(SimpleAgent):
         response = self.llm.invoke(messages)
 
         # 3. 保存大纲到笔记
-        create_output = self.note_tools[novel_id].run({
-            "action": "create",
-            "title": f"{novel_id}-大纲",
-            "content": response,
-            "note_type": "outline",
-            "tags": ["outline"]
-        })
+        create_output = self.note_tools[novel_id].run(
+            {
+                "action": "create",
+                "title": f"{novel_id}-大纲",
+                "content": response,
+                "note_type": "outline",
+                "tags": ["outline"],
+            }
+        )
         # 获取笔记ID，建立与小说ID的关联
         note_id = extract_note_id(create_output)
 
         return response, note_id
 
-    def get_outline(self, novel_id: str, note_id: str, title: str = None) -> str:    
+    def get_outline(self, novel_id: str, note_id: str, title: str = None) -> str:
         """获取大纲"""
         if title:
             self._ensure_tool(novel_id, title)
-        return self.note_tools[novel_id].run({
-            "action": "read",
-            "note_id": note_id
-        })
-    
+        return self.note_tools[novel_id].run({"action": "read", "note_id": note_id})
+
     def del_outline(self, novel_id: str, note_id: str, title: str = None):
         """删除大纲"""
         if title:
             self._ensure_tool(novel_id, title)
-        self.note_tools[novel_id].run({
-            "action": "delete",
-            "note_id": note_id
-        })
+        self.note_tools[novel_id].run({"action": "delete", "note_id": note_id})
 
     def update_outline(self, novel_id: str, note_id: str, title: str = None, **kwargs):
         """更新大纲"""
         if title:
             self._ensure_tool(novel_id, title)
-        self.note_tools[novel_id].run({
-            "action": "update",
-            "note_id": note_id,
-            **kwargs
-        })
+        self.note_tools[novel_id].run(
+            {"action": "update", "note_id": note_id, **kwargs}
+        )
+
 
 def main():
     print("=" * 80)
@@ -139,8 +139,13 @@ def main():
     # 简单模拟：在原有内容后追加一些信息
     # 注意：update_outline 会覆盖 content，所以需要先读取再追加，或者直接传入完整的新内容
     # 这里我们演示读取后追加
-    new_content = stored_outline + "\n\n## 补充设定\n主角的能力在雨天会增强，且能听到建筑物的'呼吸声'。"
-    agent.update_outline(novel_id, note_id, content=new_content, tags=["outline", "updated"])
+    new_content = (
+        stored_outline
+        + "\n\n## 补充设定\n主角的能力在雨天会增强，且能听到建筑物的'呼吸声'。"
+    )
+    agent.update_outline(
+        novel_id, note_id, content=new_content, tags=["outline", "updated"]
+    )
     print("大纲已更新。")
 
     # 4. 再次读取验证更新

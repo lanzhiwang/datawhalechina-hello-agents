@@ -30,24 +30,24 @@ def run_evaluation(generated_data_path: str):
     Args:
         generated_data_path: 生成数据的路径
     """
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🎯 步骤2: 评估已生成的AIME题目")
-    print("="*80)
+    print("=" * 80)
     print(f"\n配置信息:")
     print(f"  - 生成数据: {generated_data_path}")
     print(f"  - 评估参考: AIME 2025真题")
-    
+
     # 检查文件是否存在
     if not os.path.exists(generated_data_path):
         print(f"\n❌ 错误：文件不存在: {generated_data_path}")
         return
-    
+
     # 加载生成数据以获取题目数量
-    with open(generated_data_path, 'r', encoding='utf-8') as f:
+    with open(generated_data_path, "r", encoding="utf-8") as f:
         generated_data = json.load(f)
     num_problems = len(generated_data)
     print(f"  - 题目数量: {num_problems}")
-    
+
     # 创建评估结果目录
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     evaluation_dir = f"data_generation/evaluation_results/{timestamp}"
@@ -65,21 +65,26 @@ def run_evaluation(generated_data_path: str):
     try:
         llm_judge_tool = LLMJudgeTool(llm=llm)
 
-        llm_judge_result_json = llm_judge_tool.run({
-            "generated_data_path": generated_data_path,
-            "reference_year": 2025,
-            "max_samples": num_problems,
-            "output_dir": os.path.join(evaluation_dir, "llm_judge"),
-            "judge_model": "gpt-4o"
-        })
+        llm_judge_result_json = llm_judge_tool.run(
+            {
+                "generated_data_path": generated_data_path,
+                "reference_year": 2025,
+                "max_samples": num_problems,
+                "output_dir": os.path.join(evaluation_dir, "llm_judge"),
+                "judge_model": "gpt-4o",
+            }
+        )
 
         llm_judge_result = json.loads(llm_judge_result_json)
         print(f"\n✅ LLM Judge评估完成！")
-        print(f"   平均总分: {llm_judge_result['metrics']['average_total_score']:.2f}/5.0")
+        print(
+            f"   平均总分: {llm_judge_result['metrics']['average_total_score']:.2f}/5.0"
+        )
         print(f"   通过率: {llm_judge_result['metrics']['pass_rate']:.2%}")
     except Exception as e:
         print(f"\n❌ LLM Judge评估失败: {e}")
         import traceback
+
         traceback.print_exc()
 
     # ========== Win Rate评估 ==========
@@ -89,13 +94,15 @@ def run_evaluation(generated_data_path: str):
     try:
         win_rate_tool = WinRateTool(llm=llm)
 
-        win_rate_result_json = win_rate_tool.run({
-            "generated_data_path": generated_data_path,
-            "reference_year": 2025,
-            "num_comparisons": min(num_problems, 20),  # 最多20次对比
-            "output_dir": os.path.join(evaluation_dir, "win_rate"),
-            "judge_model": "gpt-4o"
-        })
+        win_rate_result_json = win_rate_tool.run(
+            {
+                "generated_data_path": generated_data_path,
+                "reference_year": 2025,
+                "num_comparisons": min(num_problems, 20),  # 最多20次对比
+                "output_dir": os.path.join(evaluation_dir, "win_rate"),
+                "judge_model": "gpt-4o",
+            }
+        )
 
         win_rate_result = json.loads(win_rate_result_json)
         print(f"\n✅ Win Rate评估完成！")
@@ -103,33 +110,34 @@ def run_evaluation(generated_data_path: str):
     except Exception as e:
         print(f"\n❌ Win Rate评估失败: {e}")
         import traceback
+
         traceback.print_exc()
-    
+
     # ========== 生成综合报告 ==========
     comprehensive_report_path = None
     if llm_judge_result or win_rate_result:
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("📊 步骤2.3: 生成综合报告")
-        print("="*80)
+        print("=" * 80)
 
-        comprehensive_report_path = os.path.join(evaluation_dir, "comprehensive_report.md")
+        comprehensive_report_path = os.path.join(
+            evaluation_dir, "comprehensive_report.md"
+        )
 
         # 生成综合报告
         report = generate_comprehensive_report(
-            generated_data_path,
-            llm_judge_result,
-            win_rate_result
+            generated_data_path, llm_judge_result, win_rate_result
         )
 
-        with open(comprehensive_report_path, 'w', encoding='utf-8') as f:
+        with open(comprehensive_report_path, "w", encoding="utf-8") as f:
             f.write(report)
 
         print(f"\n✅ 综合报告已保存: {comprehensive_report_path}")
 
     # ========== 完成 ==========
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🎉 评估流程完成！")
-    print("="*80)
+    print("=" * 80)
     print(f"\n📁 输出文件:")
     print(f"   - 评估结果目录: {evaluation_dir}")
 
@@ -144,18 +152,18 @@ def run_evaluation(generated_data_path: str):
     print(f"\n💡 下一步:")
     if comprehensive_report_path:
         print(f"   1. 查看综合报告: {comprehensive_report_path}")
-    print(f"   2. 运行人工验证: python data_generation/human_verification_ui.py {generated_data_path}")
+    print(
+        f"   2. 运行人工验证: python data_generation/human_verification_ui.py {generated_data_path}"
+    )
 
 
 def generate_comprehensive_report(
-    generated_data_path: str,
-    llm_judge_result: dict,
-    win_rate_result: dict
+    generated_data_path: str, llm_judge_result: dict, win_rate_result: dict
 ) -> str:
     """生成综合评估报告"""
 
     # 加载生成数据
-    with open(generated_data_path, 'r', encoding='utf-8') as f:
+    with open(generated_data_path, "r", encoding="utf-8") as f:
         generated_data = json.load(f)
 
     report = f"""# AIME数据生成与评估综合报告
@@ -172,19 +180,19 @@ def generate_comprehensive_report(
 ### 主题分布
 
 """
-    
+
     # 统计主题分布
     topic_counts = {}
     for item in generated_data:
-        topic = item.get('topic', 'Unknown')
+        topic = item.get("topic", "Unknown")
         topic_counts[topic] = topic_counts.get(topic, 0) + 1
-    
+
     report += "| 主题 | 数量 | 占比 |\n"
     report += "|------|------|------|\n"
     for topic, count in sorted(topic_counts.items(), key=lambda x: x[1], reverse=True):
         percentage = count / len(generated_data) * 100
         report += f"| {topic} | {count} | {percentage:.1f}% |\n"
-    
+
     # LLM Judge结果
     if llm_judge_result:
         report += "\n## 3. LLM Judge评估结果\n\n"
@@ -224,8 +232,8 @@ def generate_comprehensive_report(
     report += "\n## 5. 综合结论\n\n"
 
     if llm_judge_result and win_rate_result:
-        overall_avg_score = llm_judge_result['metrics']['average_total_score']
-        overall_win_rate = win_rate_result['metrics']['win_rate']
+        overall_avg_score = llm_judge_result["metrics"]["average_total_score"]
+        overall_win_rate = win_rate_result["metrics"]["win_rate"]
 
         if overall_avg_score >= 4.5 and overall_win_rate >= 0.48:
             report += "✅ **结论**: 生成数据质量**优秀**，达到或超过AIME真题水平。\n"
@@ -242,7 +250,7 @@ def generate_comprehensive_report(
     report += "\n## 6. 改进建议\n\n"
 
     if llm_judge_result:
-        avg_score = llm_judge_result['metrics']['average_total_score']
+        avg_score = llm_judge_result["metrics"]["average_total_score"]
         if avg_score >= 4.5:
             report += "- ✅ 继续保持当前的生成策略\n"
             report += "- ✅ 可以考虑增加生成数量\n"
@@ -253,16 +261,18 @@ def generate_comprehensive_report(
             report += "- ⚠️ 需要重新设计生成提示词\n"
             report += "- ⚠️ 考虑使用更强的生成模型\n"
             report += "- ⚠️ 增加人工审核环节\n"
-    
+
     # 下一步行动
     report += "\n## 7. 下一步行动\n\n"
     report += "1. **人工验证**: 运行人工验证界面，对生成的题目进行人工审核\n"
     report += f"   ```bash\n   python data_generation/human_verification_ui.py {generated_data_path}\n   ```\n\n"
     report += "2. **质量筛选**: 根据评估结果筛选高质量题目\n\n"
     report += "3. **迭代优化**: 根据评估反馈优化生成策略\n"
-    
-    report += f"\n---\n\n*报告生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*\n"
-    
+
+    report += (
+        f"\n---\n\n*报告生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*\n"
+    )
+
     return report
 
 
@@ -274,7 +284,9 @@ def main():
         print("  - 数据集来源: math-ai/aime25（JSONL格式）")
         print("  - 需要安装: pip install pandas pyarrow datasets")
         print("\n示例:")
-        print("python step2_evaluate_only.py data_generation/generated_data/aime_generated_20251011_042741.json")
+        print(
+            "python step2_evaluate_only.py data_generation/generated_data/aime_generated_20251011_042741.json"
+        )
         sys.exit(1)
 
     generated_data_path = sys.argv[1]
@@ -284,4 +296,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

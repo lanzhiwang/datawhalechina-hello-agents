@@ -1,28 +1,22 @@
 from hello_agents.tools.builtin.note_tool import NoteTool
 
+
 class LearningNotesService:
     def __init__(self, workspace: str):
         self.note_tool = NoteTool(workspace=workspace)
 
-    def save_learning_progress(
-        self,
-        user_id: str,
-        progress: "LearningProgress"
-    ):
+    def save_learning_progress(self, user_id: str, progress: "LearningProgress"):
         """保存学习路径与进度"""
         content = self._format_learning_content(progress)
 
-        self.note_tool.run({
-            "action": "create",
-            "title": f"学习进度｜{progress.topic}",
-            "content": content,
-            "tags": [
-                "learning",
-                "progress",
-                progress.level,
-                user_id
-            ]
-        })
+        self.note_tool.run(
+            {
+                "action": "create",
+                "title": f"学习进度｜{progress.topic}",
+                "content": content,
+                "tags": ["learning", "progress", progress.level, user_id],
+            }
+        )
 
     def _format_learning_content(self, progress: "LearningProgress") -> str:
         content = f"# 学习主题：{progress.topic}\n\n"
@@ -34,7 +28,7 @@ class LearningNotesService:
             status_icon = {
                 "completed": "✅",
                 "in_progress": "⏳",
-                "not_started": "⬜"
+                "not_started": "⬜",
             }.get(step.status, "⬜")
 
             content += f"{idx}. {status_icon} **{step.title}**\n"

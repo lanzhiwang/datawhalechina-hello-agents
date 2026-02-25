@@ -18,7 +18,7 @@ from datasets import load_dataset
 
 class AIMEGenerator:
     """AIME题目生成器"""
-    
+
     # AIME题目生成提示词（英文）
     GENERATION_PROMPT = """You are a professional mathematics competition problem designer, skilled in creating AIME (American Invitational Mathematics Examination) style problems.
 
@@ -44,13 +44,13 @@ Please output in the following JSON format, avoid using special escape character
 }
 ```
 """
-    
+
     def __init__(
         self,
         llm: HelloAgentsLLM = None,
         delay_seconds: float = 1.0,
         use_reference_examples: bool = True,
-        reference_dataset: str = "TianHongZXY/aime-1983-2025"
+        reference_dataset: str = "TianHongZXY/aime-1983-2025",
     ):
         """
         初始化生成器
@@ -70,7 +70,7 @@ Please output in the following JSON format, avoid using special escape character
         self.agent = SimpleAgent(
             name="AIME Generator",
             llm=self.llm,
-            system_prompt="你是一位专业的数学竞赛题目设计专家。"
+            system_prompt="你是一位专业的数学竞赛题目设计专家。",
         )
         self.delay_seconds = delay_seconds
         self.use_reference_examples = use_reference_examples
@@ -93,7 +93,7 @@ Please output in the following JSON format, avoid using special escape character
                 # 统计年份分布（如果有year字段）
                 year_counts = {}
                 for item in self.reference_examples:
-                    year = item.get('year')
+                    year = item.get("year")
                     if year:
                         year_counts[year] = year_counts.get(year, 0) + 1
 
@@ -105,7 +105,7 @@ Please output in the following JSON format, avoid using special escape character
                 print(f"   ⚠️ 加载参考样例失败: {e}")
                 print(f"   ℹ️  将使用默认提示词生成")
                 self.use_reference_examples = False
-    
+
     def generate_single(self, max_retries: int = 3) -> Dict[str, Any]:
         """
         生成单个题目
@@ -125,7 +125,9 @@ Please output in the following JSON format, avoid using special escape character
                 return self._parse_response(response)
             except Exception as e:
                 if attempt < max_retries - 1:
-                    tqdm.write(f"⚠️ 生成失败（尝试 {attempt + 1}/{max_retries}），{self.delay_seconds}秒后重试...")
+                    tqdm.write(
+                        f"⚠️ 生成失败（尝试 {attempt + 1}/{max_retries}），{self.delay_seconds}秒后重试..."
+                    )
                     time.sleep(self.delay_seconds)
                 else:
                     tqdm.write(f"❌ 生成失败，已达最大重试次数: {e}")
@@ -138,8 +140,8 @@ Please output in the following JSON format, avoid using special escape character
 
         # 随机选择一个参考样例
         example = random.choice(self.reference_examples)
-        example_problem = example.get('problem', 'Example problem')
-        example_answer = example.get('answer', 0)
+        example_problem = example.get("problem", "Example problem")
+        example_answer = example.get("answer", 0)
 
         # 构建带参考样例的提示词（英文）
         prompt = f"""You are a professional mathematics competition problem designer, skilled in creating AIME (American Invitational Mathematics Examination) style problems.
@@ -200,7 +202,7 @@ Important Notes:
 
             # 使用正则表达式：找到所有未转义的反斜杠（不是\\的\）
             # 并将其替换为\\
-            fixed_json_str = re.sub(r'(?<!\\)\\(?!["\\/bfnrtu])', r'\\\\', json_str)
+            fixed_json_str = re.sub(r'(?<!\\)\\(?!["\\/bfnrtu])', r"\\\\", json_str)
 
             try:
                 problem_data = json.loads(fixed_json_str)
@@ -234,13 +236,11 @@ Important Notes:
             "problem": "生成失败，请重新生成",
             "answer": 0,
             "solution": "N/A",
-            "topic": "未知"
+            "topic": "未知",
         }
-    
+
     def generate_batch(
-        self,
-        num_problems: int = 30,
-        checkpoint_path: str = None
+        self, num_problems: int = 30, checkpoint_path: str = None
     ) -> List[Dict[str, Any]]:
         """
         批量生成题目
@@ -264,17 +264,21 @@ Important Notes:
         if checkpoint_path and os.path.exists(checkpoint_path):
             print(f"\n📂 发现检查点文件，尝试恢复...")
             try:
-                with open(checkpoint_path, 'r', encoding='utf-8') as f:
+                with open(checkpoint_path, "r", encoding="utf-8") as f:
                     problems = json.load(f)
                 start_index = len(problems)
-                print(f"   ✓ 已恢复 {start_index} 个题目，从第 {start_index + 1} 个继续")
+                print(
+                    f"   ✓ 已恢复 {start_index} 个题目，从第 {start_index + 1} 个继续"
+                )
             except Exception as e:
                 print(f"   ⚠️ 恢复失败: {e}，从头开始")
                 problems = []
                 start_index = 0
 
         # 生成题目（使用tqdm显示进度）
-        with tqdm(total=num_problems, initial=start_index, desc="生成AIME题目", unit="题") as pbar:
+        with tqdm(
+            total=num_problems, initial=start_index, desc="生成AIME题目", unit="题"
+        ) as pbar:
             last_call_time = 0  # 上次API调用的时间
 
             for i in range(start_index, num_problems):
@@ -302,42 +306,38 @@ Important Notes:
                 problems.append(problem)
 
                 # 更新进度条描述
-                pbar.set_postfix({
-                    "主题": problem.get('topic', 'N/A'),
-                    "答案": problem.get('answer', 'N/A'),
-                    "耗时": f"{generation_time:.1f}s"
-                })
+                pbar.set_postfix(
+                    {
+                        "主题": problem.get("topic", "N/A"),
+                        "答案": problem.get("answer", "N/A"),
+                        "耗时": f"{generation_time:.1f}s",
+                    }
+                )
                 pbar.update(1)
 
                 # 保存检查点
                 if checkpoint_path:
                     try:
-                        with open(checkpoint_path, 'w', encoding='utf-8') as f:
+                        with open(checkpoint_path, "w", encoding="utf-8") as f:
                             json.dump(problems, f, ensure_ascii=False, indent=2)
                     except Exception as e:
                         tqdm.write(f"⚠️ 保存检查点失败: {e}")
 
         print(f"\n✅ 生成完成！共 {len(problems)} 个题目")
         return problems
-    
-    def save_problems(
-        self,
-        problems: List[Dict[str, Any]],
-        output_path: str
-    ):
+
+    def save_problems(self, problems: List[Dict[str, Any]], output_path: str):
         """保存题目到文件"""
         # 确保目录存在
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        
-        with open(output_path, 'w', encoding='utf-8') as f:
+
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(problems, f, ensure_ascii=False, indent=2)
-        
+
         print(f"\n💾 题目已保存: {output_path}")
-    
+
     def generate_and_save(
-        self,
-        num_problems: int = 30,
-        output_dir: str = "data_generation/generated_data"
+        self, num_problems: int = 30, output_dir: str = "data_generation/generated_data"
     ) -> str:
         """生成并保存题目"""
         # 创建输出目录
@@ -376,12 +376,9 @@ Important Notes:
                 print(f"\n⚠️ 删除检查点文件失败: {e}")
 
         return output_path
-    
+
     def _generate_statistics_report(
-        self,
-        problems: List[Dict[str, Any]],
-        output_dir: str,
-        timestamp: str
+        self, problems: List[Dict[str, Any]], output_dir: str, timestamp: str
     ):
         """生成统计报告"""
         # 统计主题分布
@@ -394,7 +391,7 @@ Important Notes:
 
             if "answer" in problem:
                 answers.append(problem["answer"])
-        
+
         # 生成报告
         report = f"""# AIME题目生成统计报告
 
@@ -408,7 +405,7 @@ Important Notes:
 | 主题 | 数量 | 占比 |
 |------|------|------|
 """
-        
+
         for topic, count in sorted(topics.items(), key=lambda x: x[1], reverse=True):
             percentage = count / len(problems) * 100
             report += f"| {topic} | {count} | {percentage:.1f}% |\n"
@@ -422,7 +419,7 @@ Important Notes:
 - **最大答案**: {max(answers)}
 - **答案范围**: {min(answers)}-{max(answers)}
 """
-        
+
         report += f"""
 ## 题目列表
 
@@ -432,30 +429,29 @@ Important Notes:
 
         for problem in problems[:10]:  # 只显示前10个
             report += f"| {problem.get('id', 'N/A')} | {problem.get('topic', 'N/A')} | {problem.get('answer', 'N/A')} |\n"
-        
+
         if len(problems) > 10:
             report += f"\n*（仅显示前10个题目，完整列表请查看JSON文件）*\n"
-        
+
         report += f"""
 ---
 
 *报告生成时间: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}*
 """
-        
+
         # 保存报告
         report_path = os.path.join(output_dir, f"generation_report_{timestamp}.md")
-        with open(report_path, 'w', encoding='utf-8') as f:
+        with open(report_path, "w", encoding="utf-8") as f:
             f.write(report)
-        
+
         print(f"📊 统计报告已保存: {report_path}")
 
 
 if __name__ == "__main__":
     # 创建生成器
     generator = AIMEGenerator()
-    
+
     # 生成30个题目
     output_path = generator.generate_and_save(num_problems=30)
-    
-    print(f"\n✅ 完成！生成的题目保存在: {output_path}")
 
+    print(f"\n✅ 完成！生成的题目保存在: {output_path}")

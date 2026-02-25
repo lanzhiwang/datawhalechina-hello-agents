@@ -2,16 +2,17 @@ from hello_agents import SimpleAgent, HelloAgentsLLM
 from hello_agents.tools import Tool
 from typing import List
 
+
 class ReviewerAgent(SimpleAgent):
     """
     负责评审代码的智能体。
     它可以访问 CodeRunner 工具来执行代码。
     """
-    
+
     def __init__(self, llm: HelloAgentsLLM, tools: List[Tool] = None):
         """
         初始化 ReviewerAgent。
-        
+
         Args:
             llm: 用于评审代码的大语言模型实例。
             tools: 智能体可用的工具列表（例如 CodeRunner）。
@@ -43,12 +44,8 @@ class ReviewerAgent(SimpleAgent):
         
         如果代码有错误，解释原因并提供修复提示，但不要直接给出完整的解决方案，除非用户多次尝试失败。
         """
-        super().__init__(
-            name="Reviewer",
-            llm=llm,
-            system_prompt=system_prompt
-        )
-        
+        super().__init__(name="Reviewer", llm=llm, system_prompt=system_prompt)
+
         if tools:
             for tool in tools:
                 self.add_tool(tool)

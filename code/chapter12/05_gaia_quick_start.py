@@ -28,9 +28,7 @@ If you are asked for a comma separated list, apply the above rules depending of 
 # 2. 创建智能体（必须使用GAIA官方系统提示词）
 llm = HelloAgentsLLM()
 agent = SimpleAgent(
-    name="TestAgent",
-    llm=llm,
-    system_prompt=GAIA_SYSTEM_PROMPT  # 必须使用官方提示词
+    name="TestAgent", llm=llm, system_prompt=GAIA_SYSTEM_PROMPT  # 必须使用官方提示词
 )
 
 # 3. 创建GAIA评估工具
@@ -39,10 +37,10 @@ gaia_tool = GAIAEvaluationTool()
 # 4. 运行评估
 results = gaia_tool.run(
     agent=agent,
-    level=1,              # 评估级别（1=简单，2=中等，3=困难）
-    max_samples=2,        # 评估样本数（0表示全部）
+    level=1,  # 评估级别（1=简单，2=中等，3=困难）
+    max_samples=2,  # 评估样本数（0表示全部）
     export_results=True,  # 导出结果到GAIA官方格式
-    generate_report=True  # 生成详细报告
+    generate_report=True,  # 生成详细报告
 )
 
 # 5. 查看结果
@@ -55,31 +53,30 @@ print(f"正确数: {results['correct_samples']}/{results['total_samples']}")
 # ============================================================
 # GAIA一键评估
 # ============================================================
-# 
+#
 # 配置:
 #    智能体: TestAgent
 #    级别: Level 1
 #    样本数: 2
-# 
+#
 # ✅ GAIA数据集加载完成
 #    数据源: gaia-benchmark/GAIA
 #    分割: validation
 #    级别: 1
 #    样本数: 2
-# 
+#
 # 评估进度: 100%|██████████| 2/2 [00:10<00:00,  5.23s/样本]
-# 
+#
 # ✅ 评估完成
 #    总样本数: 2
 #    正确样本数: 2
 #    精确匹配率: 100.00%
 #    部分匹配率: 100.00%
-# 
+#
 # ✅ 结果已导出到 ./evaluation_results/gaia_submission.json
 # ✅ 报告已生成到 ./evaluation_results/gaia_report.md
-# 
+#
 # 评估结果:
 # 精确匹配率: 100.00%
 # 部分匹配率: 100.00%
 # 正确数: 2/2
-

@@ -2,6 +2,7 @@
 
 from enum import Enum
 
+
 class DialogueState(str, Enum):
     INIT = "init"
     MOOD = "mood"

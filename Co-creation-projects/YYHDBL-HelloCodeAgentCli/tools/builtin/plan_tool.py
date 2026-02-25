@@ -57,9 +57,7 @@ class PlanTool(Tool):
         if self.prompt_path and self.prompt_path.exists():
             prompt = self.prompt_path.read_text(encoding="utf-8")
         else:
-            prompt = (
-                "你是一个规划助手。请输出一个可执行计划（5~12步），并包含 Risks 与 Validation。"
-            )
+            prompt = "你是一个规划助手。请输出一个可执行计划（5~12步），并包含 Risks 与 Validation。"
 
         user_msg = f"目标：{goal}\n期望输出：{output}"
         if constraints:
@@ -73,4 +71,3 @@ class PlanTool(Tool):
             max_tokens=800,
         )
         return resp or ""
-

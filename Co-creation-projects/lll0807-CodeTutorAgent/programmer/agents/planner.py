@@ -10,13 +10,12 @@ class PlannerAgent(SimpleAgent):
     def __init__(self, llm: HelloAgentsLLM, knowledge_service):
         """
         初始化 PlannerAgent。
-        
+
         Args:
             llm: 用于生成计划的大语言模型实例。
         """
         # 在 PlannerAgent.run() 中
         self.knowledge = knowledge_service
-
 
         system_prompt = """
         你是一位专业的计算机科学课程规划师。
@@ -57,11 +56,7 @@ class PlannerAgent(SimpleAgent):
         3. 输出【更新后的完整学习计划 Markdown 文档】（而不是只输出差异）以### 更新学习计划作为开头。
         
         """
-        super().__init__(
-            name="Planner",
-            llm=llm,
-            system_prompt=system_prompt
-        )
+        super().__init__(name="Planner", llm=llm, system_prompt=system_prompt)
         self.note_tool = NoteTool(workspace="notes")
 
     def run(self, input_text: str, max_tool_iterations: int = 3, **kwargs) -> str:
@@ -81,22 +76,26 @@ class PlannerAgent(SimpleAgent):
 
     def _update_learning_plan(self, markdown: str, input_text: str):
         title_and_note_id_str = self.knowledge.recall(input_text)
-        self.note_tool.run({
-            "note_id": self.note_tool.notes_index['notes'][-1]['id'],
-            "action": "update",  # 注意是 update
-            "title": "学习计划",
-            "content": markdown,
-            "tags": ["learning-plan", "progress"]
-        })
+        self.note_tool.run(
+            {
+                "note_id": self.note_tool.notes_index["notes"][-1]["id"],
+                "action": "update",  # 注意是 update
+                "title": "学习计划",
+                "content": markdown,
+                "tags": ["learning-plan", "progress"],
+            }
+        )
         # self.knowledge.add_note(content=markdown)
 
     def _save_learning_plan(self, markdown: str, input_text: str):
 
-        note_id = self.note_tool.run({
-            "action": "create",
-            "title": "学习计划",
-            "content": markdown,
-            "tags": ["learning-plan", "planner"]
-        })
+        note_id = self.note_tool.run(
+            {
+                "action": "create",
+                "title": "学习计划",
+                "content": markdown,
+                "tags": ["learning-plan", "planner"],
+            }
+        )
         content = f"title: {input_text} note_id: {note_id}"
         self.knowledge.add_note(content=content)

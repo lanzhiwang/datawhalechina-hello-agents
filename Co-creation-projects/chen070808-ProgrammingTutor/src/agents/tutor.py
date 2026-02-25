@@ -1,16 +1,17 @@
 from hello_agents import SimpleAgent, HelloAgentsLLM
 from typing import Dict, Any
 
+
 class TutorAgent(SimpleAgent):
     """
     主要协调智能体，直接管理 Planner、Exercise 和 Reviewer 子智能体。
     使用简单的直接调用模式，不依赖 A2A 协议。
     """
-    
+
     def __init__(self, llm: HelloAgentsLLM):
         """
         初始化 TutorAgent 和所有子智能体。
-        
+
         Args:
             llm: 用于所有 agents 的大语言模型实例。
         """
@@ -20,12 +21,12 @@ class TutorAgent(SimpleAgent):
         from agents.reviewer import ReviewerAgent
         from tools.code_runner import CodeRunner
         from tools.agent_tool import AgentTool
-        
+
         # 创建子智能体实例
         self.planner = PlannerAgent(llm)
         self.exercise = ExerciseAgent(llm)
         self.reviewer = ReviewerAgent(llm, tools=[CodeRunner()])
-        
+
         # 定义系统提示词
         system_prompt = """
         你是一位智能编程导师 (Tutor)。你负责协调个性化的学习体验。
@@ -71,29 +72,31 @@ class TutorAgent(SimpleAgent):
         - ✅ 等待工具返回结果
         - ✅ 将结果友好地呈现给用户
         """
-        
+
         # 初始化父类
-        super().__init__(
-            name="Tutor",
-            llm=llm,
-            system_prompt=system_prompt
-        )
-        
+        super().__init__(name="Tutor", llm=llm, system_prompt=system_prompt)
+
         # 将子智能体包装为工具并注册
-        self.add_tool(AgentTool(
-            self.planner,
-            name="call_planner",
-            description="调用课程规划师，为用户制定个性化的学习计划"
-        ))
-        
-        self.add_tool(AgentTool(
-            self.exercise,
-            name="call_exercise",
-            description="调用出题人，根据学习内容生成编程练习题"
-        ))
-        
-        self.add_tool(AgentTool(
-            self.reviewer,
-            name="call_reviewer",
-            description="调用评审员，对用户提交的代码进行评审和反馈"
-        ))
+        self.add_tool(
+            AgentTool(
+                self.planner,
+                name="call_planner",
+                description="调用课程规划师，为用户制定个性化的学习计划",
+            )
+        )
+
+        self.add_tool(
+            AgentTool(
+                self.exercise,
+                name="call_exercise",
+                description="调用出题人，根据学习内容生成编程练习题",
+            )
+        )
+
+        self.add_tool(
+            AgentTool(
+                self.reviewer,
+                name="call_reviewer",
+                description="调用评审员，对用户提交的代码进行评审和反馈",
+            )
+        )

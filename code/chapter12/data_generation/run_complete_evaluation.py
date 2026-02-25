@@ -28,10 +28,7 @@ from hello_agents import SimpleAgent, HelloAgentsLLM
 from hello_agents.tools import LLMJudgeTool, WinRateTool
 
 
-def run_complete_evaluation(
-    num_problems: int = 30,
-    delay_seconds: float = 3.0
-):
+def run_complete_evaluation(num_problems: int = 30, delay_seconds: float = 3.0):
     """
     运行完整评估流程
 
@@ -39,9 +36,9 @@ def run_complete_evaluation(
         num_problems: 生成题目数量
         delay_seconds: 每次生成之间的延迟（秒），避免API速率限制
     """
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🚀 AIME数据生成与评估完整流程")
-    print("="*80)
+    print("=" * 80)
     print(f"\n配置信息:")
     print(f"  - 生成题目数量: {num_problems}")
     print(f"  - API延迟: {delay_seconds}秒/题")
@@ -49,14 +46,13 @@ def run_complete_evaluation(
     print(f"  - 评估参考: AIME 2025真题")
 
     # ========== 步骤1: 生成AIME题目 ==========
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("📝 步骤1: 生成AIME题目")
-    print("="*80)
+    print("=" * 80)
 
     generator = AIMEGenerator(delay_seconds=delay_seconds)
     generated_data_path = generator.generate_and_save(
-        num_problems=num_problems,
-        output_dir="data_generation/generated_data"
+        num_problems=num_problems, output_dir="data_generation/generated_data"
     )
 
     print(f"\n✅ 步骤1完成！生成数据保存在: {generated_data_path}")
@@ -79,21 +75,26 @@ def run_complete_evaluation(
     try:
         llm_judge_tool = LLMJudgeTool(llm=llm)
 
-        llm_judge_result_json = llm_judge_tool.run({
-            "generated_data_path": generated_data_path,
-            "reference_year": 2025,
-            "max_samples": num_problems,
-            "output_dir": os.path.join(evaluation_dir, "llm_judge"),
-            "judge_model": "gpt-4o"
-        })
+        llm_judge_result_json = llm_judge_tool.run(
+            {
+                "generated_data_path": generated_data_path,
+                "reference_year": 2025,
+                "max_samples": num_problems,
+                "output_dir": os.path.join(evaluation_dir, "llm_judge"),
+                "judge_model": "gpt-4o",
+            }
+        )
 
         llm_judge_result = json.loads(llm_judge_result_json)
         print(f"\n✅ LLM Judge评估完成！")
-        print(f"   平均总分: {llm_judge_result['metrics']['average_total_score']:.2f}/5.0")
+        print(
+            f"   平均总分: {llm_judge_result['metrics']['average_total_score']:.2f}/5.0"
+        )
         print(f"   通过率: {llm_judge_result['metrics']['pass_rate']:.2%}")
     except Exception as e:
         print(f"\n❌ LLM Judge评估失败: {e}")
         import traceback
+
         traceback.print_exc()
 
     # ========== 步骤2.2: Win Rate评估 ==========
@@ -103,13 +104,15 @@ def run_complete_evaluation(
     try:
         win_rate_tool = WinRateTool(llm=llm)
 
-        win_rate_result_json = win_rate_tool.run({
-            "generated_data_path": generated_data_path,
-            "reference_year": 2025,
-            "num_comparisons": min(num_problems, 20),  # 最多20次对比
-            "output_dir": os.path.join(evaluation_dir, "win_rate"),
-            "judge_model": "gpt-4o"
-        })
+        win_rate_result_json = win_rate_tool.run(
+            {
+                "generated_data_path": generated_data_path,
+                "reference_year": 2025,
+                "num_comparisons": min(num_problems, 20),  # 最多20次对比
+                "output_dir": os.path.join(evaluation_dir, "win_rate"),
+                "judge_model": "gpt-4o",
+            }
+        )
 
         win_rate_result = json.loads(win_rate_result_json)
         print(f"\n✅ Win Rate评估完成！")
@@ -117,33 +120,34 @@ def run_complete_evaluation(
     except Exception as e:
         print(f"\n❌ Win Rate评估失败: {e}")
         import traceback
+
         traceback.print_exc()
 
     # ========== 步骤3: 生成综合报告 ==========
     comprehensive_report_path = None
     if llm_judge_result or win_rate_result:
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("📊 步骤3: 生成综合报告")
-        print("="*80)
+        print("=" * 80)
 
-        comprehensive_report_path = os.path.join(evaluation_dir, "comprehensive_report.md")
+        comprehensive_report_path = os.path.join(
+            evaluation_dir, "comprehensive_report.md"
+        )
 
         # 生成综合报告
         report = generate_comprehensive_report(
-            generated_data_path,
-            llm_judge_result,
-            win_rate_result
+            generated_data_path, llm_judge_result, win_rate_result
         )
 
-        with open(comprehensive_report_path, 'w', encoding='utf-8') as f:
+        with open(comprehensive_report_path, "w", encoding="utf-8") as f:
             f.write(report)
 
         print(f"\n✅ 综合报告已保存: {comprehensive_report_path}")
 
     # ========== 完成 ==========
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🎉 完整评估流程完成！")
-    print("="*80)
+    print("=" * 80)
     print(f"\n📁 输出文件:")
     print(f"   - 生成数据: {generated_data_path}")
     print(f"   - 评估结果目录: {evaluation_dir}")
@@ -159,25 +163,25 @@ def run_complete_evaluation(
     print(f"\n💡 下一步:")
     if comprehensive_report_path:
         print(f"   1. 查看综合报告: {comprehensive_report_path}")
-    print(f"   2. 运行人工验证: python data_generation/human_verification_ui.py {generated_data_path}")
+    print(
+        f"   2. 运行人工验证: python data_generation/human_verification_ui.py {generated_data_path}"
+    )
 
     return {
         "generated_data_path": generated_data_path,
         "llm_judge_result": llm_judge_result,
         "win_rate_result": win_rate_result,
-        "comprehensive_report_path": comprehensive_report_path
+        "comprehensive_report_path": comprehensive_report_path,
     }
 
 
 def generate_comprehensive_report(
-    generated_data_path: str,
-    llm_judge_result: dict,
-    win_rate_result: dict
+    generated_data_path: str, llm_judge_result: dict, win_rate_result: dict
 ) -> str:
     """生成综合评估报告"""
 
     # 加载生成数据
-    with open(generated_data_path, 'r', encoding='utf-8') as f:
+    with open(generated_data_path, "r", encoding="utf-8") as f:
         generated_data = json.load(f)
 
     report = f"""# AIME数据生成与评估综合报告
@@ -198,7 +202,7 @@ def generate_comprehensive_report(
     # 统计主题分布
     topic_counts = {}
     for item in generated_data:
-        topic = item.get('topic', 'Unknown')
+        topic = item.get("topic", "Unknown")
         topic_counts[topic] = topic_counts.get(topic, 0) + 1
 
     report += "| 主题 | 数量 | 占比 |\n"
@@ -246,8 +250,8 @@ def generate_comprehensive_report(
     report += "\n## 5. 综合结论\n\n"
 
     if llm_judge_result and win_rate_result:
-        overall_avg_score = llm_judge_result['metrics']['average_total_score']
-        overall_win_rate = win_rate_result['metrics']['win_rate']
+        overall_avg_score = llm_judge_result["metrics"]["average_total_score"]
+        overall_win_rate = win_rate_result["metrics"]["win_rate"]
 
         if overall_avg_score >= 4.5 and overall_win_rate >= 0.48:
             report += "✅ **结论**: 生成数据质量**优秀**，达到或超过AIME真题水平。\n"
@@ -264,7 +268,7 @@ def generate_comprehensive_report(
     report += "\n## 6. 改进建议\n\n"
 
     if llm_judge_result:
-        avg_score = llm_judge_result['metrics']['average_total_score']
+        avg_score = llm_judge_result["metrics"]["average_total_score"]
         if avg_score >= 4.5:
             report += "- ✅ 继续保持当前的生成策略\n"
             report += "- ✅ 可以考虑增加生成数量\n"
@@ -283,7 +287,9 @@ def generate_comprehensive_report(
     report += "2. **质量筛选**: 根据评估结果筛选高质量题目\n\n"
     report += "3. **迭代优化**: 根据评估反馈优化生成策略\n"
 
-    report += f"\n---\n\n*报告生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*\n"
+    report += (
+        f"\n---\n\n*报告生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*\n"
+    )
 
     return report
 
@@ -303,12 +309,8 @@ def main():
     delay_seconds = float(sys.argv[2]) if len(sys.argv) > 2 else 3.0
 
     # 运行完整评估
-    run_complete_evaluation(
-        num_problems=num_problems,
-        delay_seconds=delay_seconds
-    )
+    run_complete_evaluation(num_problems=num_problems, delay_seconds=delay_seconds)
 
 
 if __name__ == "__main__":
     main()
-

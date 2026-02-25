@@ -11,7 +11,6 @@ import threading
 import time
 from typing import Iterable
 
-
 RESET = "\x1b[0m"
 PRIMARY = "\x1b[38;2;120;200;255m"
 ACCENT = "\x1b[38;2;150;140;255m"

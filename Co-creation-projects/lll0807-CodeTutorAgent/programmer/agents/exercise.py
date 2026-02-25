@@ -21,19 +21,14 @@ class ExerciseAgent(SimpleAgent):
 - 不要生成新题目
 你只需要输出Easy或Medium
 """
-        super().__init__(
-            name="Exercise",
-            llm=llm,
-            system_prompt=system_prompt
-        )
+        super().__init__(name="Exercise", llm=llm, system_prompt=system_prompt)
 
         root_dir = r"E:\PycharmProject_lmx\HelloAgents-main\output"
         self.repo = ProblemRepository(root_dir)
 
         # ===== 初始化 RAG =====
         self.rag = RAGTool(
-            collection_name="rag_knowledge_base",
-            rag_namespace="problems"
+            collection_name="rag_knowledge_base", rag_namespace="problems"
         )
         # ===== 判断是否需要初始化题库 =====
         need_init = False
@@ -57,7 +52,7 @@ class ExerciseAgent(SimpleAgent):
                 Tags: {", ".join(problem['tags'])}
                 Description: {problem['description'][:200]}
                 """.strip(),
-                    document_id=problem["title"]
+                    document_id=problem["title"],
                 )
         print("✅ 编程题目向量仓库构建完成")
 
@@ -65,11 +60,7 @@ class ExerciseAgent(SimpleAgent):
 
         result = super().run(input_text)
         # ========= RAG 语义召回 =========
-        rag_results = self.rag.search(
-            query=result,
-            limit=3,
-            min_score=0.3
-        )
+        rag_results = self.rag.search(query=result, limit=3, min_score=0.3)
         titles = re.findall(r"Title:\s*(.+)", rag_results)
 
         user_problems = []
@@ -83,10 +74,7 @@ class ExerciseAgent(SimpleAgent):
             return "❌ 没有找到相关题目"
 
         # ========= 4️⃣ 返回标准化结果 =========
-        return "\n\n".join(
-            self._format_problem(problem)
-            for problem in user_problems
-        )
+        return "\n\n".join(self._format_problem(problem) for problem in user_problems)
 
         # =========================================================
         # RAG 解析

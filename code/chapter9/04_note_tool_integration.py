@@ -6,7 +6,9 @@ NoteTool 与 ContextBuilder 集成示例
 2. 笔记检索与上下文注入
 3. 基于历史笔记的连贯建议
 """
+
 from dotenv import load_dotenv
+
 load_dotenv()
 from hello_agents import SimpleAgent, HelloAgentsLLM
 from hello_agents.context import ContextBuilder, ContextConfig, ContextPacket
@@ -22,6 +24,7 @@ class ProjectAssistant(SimpleAgent):
     def __init__(self, name: str, project_name: str, **kwargs):
         # 配置 LLM
         from hello_agents.core.llm import HelloAgentsLLM
+
         llm = HelloAgentsLLM()
 
         super().__init__(name=name, llm=llm, **kwargs)
@@ -56,13 +59,13 @@ class ProjectAssistant(SimpleAgent):
             user_query=user_input,
             conversation_history=self.conversation_history,
             system_instructions=self._build_system_instructions(),
-            additional_packets=note_packets
+            additional_packets=note_packets,
         )
 
         # 4. 调用 LLM (以 messages 数组形式传入)
         messages = [
             {"role": "system", "content": optimized_context},
-            {"role": "user", "content": user_input}
+            {"role": "user", "content": user_input},
         ]
         response = self.llm.invoke(messages)
 
@@ -79,18 +82,14 @@ class ProjectAssistant(SimpleAgent):
         """检索相关笔记"""
         try:
             # 优先检索 blocker 和 action 类型的笔记
-            blockers_raw = self.note_tool.run({
-                "action": "list",
-                "note_type": "blocker",
-                "limit": 2
-            })
+            blockers_raw = self.note_tool.run(
+                {"action": "list", "note_type": "blocker", "limit": 2}
+            )
 
             # 通用搜索
-            search_results_raw = self.note_tool.run({
-                "action": "search",
-                "query": query,
-                "limit": limit
-            })
+            search_results_raw = self.note_tool.run(
+                {"action": "search", "query": query, "limit": limit}
+            )
 
             blockers = self._ensure_list_of_dicts(blockers_raw)
             search_results = self._ensure_list_of_dicts(search_results_raw)
@@ -117,6 +116,7 @@ class ProjectAssistant(SimpleAgent):
     def _ensure_list_of_dicts(self, data) -> List[Dict]:
         """将 NoteTool 返回规范化为字典列表"""
         import json
+
         if data is None:
             return []
         if isinstance(data, str):
@@ -171,17 +171,19 @@ class ProjectAssistant(SimpleAgent):
                 or str(hash(str(note)))
             )
 
-            packets.append(ContextPacket(
-                content=content,
-                timestamp=parsed_ts,
-                token_count=len(content) // 4,  # 简单估算
-                relevance_score=0.75,  # 笔记具有较高相关性
-                metadata={
-                    "type": "note",
-                    "note_type": note_type,
-                    "note_id": note_id
-                }
-            ))
+            packets.append(
+                ContextPacket(
+                    content=content,
+                    timestamp=parsed_ts,
+                    token_count=len(content) // 4,  # 简单估算
+                    relevance_score=0.75,  # 笔记具有较高相关性
+                    metadata={
+                        "type": "note",
+                        "note_type": note_type,
+                        "note_id": note_id,
+                    },
+                )
+            )
 
         return packets
 
@@ -196,13 +198,15 @@ class ProjectAssistant(SimpleAgent):
             else:
                 note_type = "conclusion"
 
-            self.note_tool.run({
-                "action": "create",
-                "title": f"{user_input[:30]}...",
-                "content": f"## 问题\n{user_input}\n\n## 分析\n{response}",
-                "note_type": note_type,
-                "tags": [self.project_name, "auto_generated"]
-            })
+            self.note_tool.run(
+                {
+                    "action": "create",
+                    "title": f"{user_input[:30]}...",
+                    "content": f"## 问题\n{user_input}\n\n## 分析\n{response}",
+                    "note_type": note_type,
+                    "tags": [self.project_name, "auto_generated"],
+                }
+            )
 
         except Exception as e:
             print(f"[WARNING] 保存笔记失败: {e}")
@@ -243,15 +247,14 @@ def main():
 
     # 使用示例
     assistant = ProjectAssistant(
-        name="项目助手",
-        project_name="data_pipeline_refactoring"
+        name="项目助手", project_name="data_pipeline_refactoring"
     )
 
     # 第一次交互:记录项目状态
     print("第一次交互:记录项目状态")
     response = assistant.run(
         "我们已经完成了数据模型层的重构,测试覆盖率达到85%。下一步计划重构业务逻辑层。",
-        note_as_action=True
+        note_as_action=True,
     )
     print(f"助手回答: {response}\n")
 
@@ -266,6 +269,7 @@ def main():
     print("查看笔记摘要:")
     summary = assistant.note_tool.run({"action": "summary"})
     import json
+
     print(json.dumps(summary, indent=2, ensure_ascii=False).replace("\\n", "\n"))
 
     print("\n" + "=" * 80)

@@ -12,8 +12,8 @@ from .controller import AgentController
 __all__ = [
     "BaseAgent",
     "HunterAgent",
-    "MinerAgent", 
+    "MinerAgent",
     "CoachAgent",
     "ValidatorAgent",
-    "AgentController"
+    "AgentController",
 ]

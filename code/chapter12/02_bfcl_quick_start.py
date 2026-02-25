@@ -20,7 +20,7 @@ bfcl_tool = BFCLEvaluationTool()
 results = bfcl_tool.run(
     agent=agent,
     category="simple_python",  # 评估类别
-    max_samples=5              # 评估样本数（0表示全部）
+    max_samples=5,  # 评估样本数（0表示全部）
 )
 
 # 4. 查看结果
@@ -31,19 +31,18 @@ print(f"正确数: {results['correct_samples']}/{results['total_samples']}")
 # ============================================================
 # BFCL一键评估
 # ============================================================
-# 
+#
 # 配置:
 #    智能体: TestAgent
 #    类别: simple_python
 #    样本数: 5
-# 
+#
 # 评估进度: 100%|██████████| 5/5 [00:15<00:00,  3.12s/样本]
-# 
+#
 # ✅ 评估完成
 #    总样本数: 5
 #    正确样本数: 5
 #    准确率: 100.00%
-# 
+#
 # 准确率: 100.00%
 # 正确数: 5/5
-

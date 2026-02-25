@@ -1,6 +1,7 @@
 from hello_agents import SimpleAgent, HelloAgentsLLM
 from hello_agents.tools.builtin.note_tool import NoteTool
 
+
 class CodeReviewAgent(SimpleAgent):
     """
     负责评测用户提交的代码
@@ -33,8 +34,4 @@ class CodeReviewAgent(SimpleAgent):
 
 请使用 Markdown 输出。
 """
-        super().__init__(
-            name="CodeReview",
-            llm=llm,
-            system_prompt=system_prompt
-        )
+        super().__init__(name="CodeReview", llm=llm, system_prompt=system_prompt)

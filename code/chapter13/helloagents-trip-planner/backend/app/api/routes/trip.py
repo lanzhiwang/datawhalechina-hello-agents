@@ -1,11 +1,7 @@
 """旅行规划API路由"""
 
 from fastapi import APIRouter, HTTPException
-from ...models.schemas import (
-    TripRequest,
-    TripPlanResponse,
-    ErrorResponse
-)
+from ...models.schemas import TripRequest, TripPlanResponse, ErrorResponse
 from ...agents.trip_planner_agent import get_trip_planner_agent
 
 router = APIRouter(prefix="/trip", tags=["旅行规划"])
@@ -15,7 +11,7 @@ router = APIRouter(prefix="/trip", tags=["旅行规划"])
     "/plan",
     response_model=TripPlanResponse,
     summary="生成旅行计划",
-    description="根据用户输入的旅行需求,生成详细的旅行计划"
+    description="根据用户输入的旅行需求,生成详细的旅行计划",
 )
 async def plan_trip(request: TripRequest):
     """
@@ -46,41 +42,29 @@ async def plan_trip(request: TripRequest):
         print("✅ 旅行计划生成成功,准备返回响应\n")
 
         return TripPlanResponse(
-            success=True,
-            message="旅行计划生成成功",
-            data=trip_plan
+            success=True, message="旅行计划生成成功", data=trip_plan
         )
 
     except Exception as e:
         print(f"❌ 生成旅行计划失败: {str(e)}")
         import traceback
+
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail=f"生成旅行计划失败: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"生成旅行计划失败: {str(e)}")
 
 
-@router.get(
-    "/health",
-    summary="健康检查",
-    description="检查旅行规划服务是否正常"
-)
+@router.get("/health", summary="健康检查", description="检查旅行规划服务是否正常")
 async def health_check():
     """健康检查"""
     try:
         # 检查Agent是否可用
         agent = get_trip_planner_agent()
-        
+
         return {
             "status": "healthy",
             "service": "trip-planner",
             "agent_name": agent.agent.name,
-            "tools_count": len(agent.agent.list_tools())
+            "tools_count": len(agent.agent.list_tools()),
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=503,
-            detail=f"服务不可用: {str(e)}"
-        )
-
+        raise HTTPException(status_code=503, detail=f"服务不可用: {str(e)}")

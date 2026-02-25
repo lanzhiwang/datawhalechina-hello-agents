@@ -2,12 +2,12 @@
 
 from hello_agents.tools import Tool as BaseTool
 
+
 class TextComfortTool(BaseTool):
 
     def __init__(self):
         super().__init__(
-            name="text_comfort_tool",
-            description="提供安抚要点，LLM 负责生成自然语言"
+            name="text_comfort_tool", description="提供安抚要点，LLM 负责生成自然语言"
         )
         self.name = "text_comfort_tool"
         self.description = "提供安抚要点，LLM 负责生成自然语言"
@@ -15,10 +15,8 @@ class TextComfortTool(BaseTool):
     def get_parameters(self):
         return {
             "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "用户输入"}
-            },
-            "required": ["query"]
+            "properties": {"query": {"type": "string", "description": "用户输入"}},
+            "required": ["query"],
         }
 
     def run(self, query: str) -> str:

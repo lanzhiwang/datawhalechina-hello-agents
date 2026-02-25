@@ -29,6 +29,7 @@ PLANNER_PROMPT_TEMPLATE = """
 ```
 """
 
+
 class Planner:
     def __init__(self, llm_client: HelloAgentsLLM):
         self.llm_client = llm_client
@@ -36,11 +37,11 @@ class Planner:
     def plan(self, question: str) -> list[str]:
         prompt = PLANNER_PROMPT_TEMPLATE.format(question=question)
         messages = [{"role": "user", "content": prompt}]
-        
+
         print("--- 正在生成计划 ---")
         response_text = self.llm_client.think(messages=messages) or ""
         print(f"✅ 计划已生成:\n{response_text}")
-        
+
         try:
             plan_str = response_text.split("```python")[1].split("```")[0].strip()
             plan = ast.literal_eval(plan_str)
@@ -52,6 +53,7 @@ class Planner:
         except Exception as e:
             print(f"❌ 解析计划时发生未知错误: {e}")
             return []
+
 
 # --- 3. 执行器 (Executor) 定义 ---
 EXECUTOR_PROMPT_TEMPLATE = """
@@ -74,6 +76,7 @@ EXECUTOR_PROMPT_TEMPLATE = """
 请仅输出针对“当前步骤”的回答:
 """
 
+
 class Executor:
     def __init__(self, llm_client: HelloAgentsLLM):
         self.llm_client = llm_client
@@ -81,22 +84,26 @@ class Executor:
     def execute(self, question: str, plan: list[str]) -> str:
         history = ""
         final_answer = ""
-        
+
         print("\n--- 正在执行计划 ---")
         for i, step in enumerate(plan, 1):
             print(f"\n-> 正在执行步骤 {i}/{len(plan)}: {step}")
             prompt = EXECUTOR_PROMPT_TEMPLATE.format(
-                question=question, plan=plan, history=history if history else "无", current_step=step
+                question=question,
+                plan=plan,
+                history=history if history else "无",
+                current_step=step,
             )
             messages = [{"role": "user", "content": prompt}]
-            
+
             response_text = self.llm_client.think(messages=messages) or ""
-            
+
             history += f"步骤 {i}: {step}\n结果: {response_text}\n\n"
             final_answer = response_text
             print(f"✅ 步骤 {i} 已完成，结果: {final_answer}")
-            
+
         return final_answer
+
 
 # --- 4. 智能体 (Agent) 整合 ---
 class PlanAndSolveAgent:
@@ -114,8 +121,9 @@ class PlanAndSolveAgent:
         final_answer = self.executor.execute(question, plan)
         print(f"\n--- 任务完成 ---\n最终答案: {final_answer}")
 
+
 # --- 5. 主函数入口 ---
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         llm_client = HelloAgentsLLM()
         agent = PlanAndSolveAgent(llm_client)

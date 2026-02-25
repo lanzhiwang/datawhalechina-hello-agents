@@ -23,8 +23,8 @@ for i in range(10):
             "load": random.uniform(0.1, 0.9),
             "cpu_cores": random.choice([4, 8, 16]),
             "memory_gb": random.choice([16, 32, 64]),
-            "gpu": random.choice([True, False])
-        }
+            "gpu": random.choice([True, False]),
+        },
     )
 
 print(f"✅ 注册了 {len(discovery.list_all_services())} 个计算节点")
@@ -42,16 +42,17 @@ scheduler = SimpleAgent(
 
 使用 service_discovery 工具时，必须提供 action 参数：
 - 查看所有节点：{"action": "discover_services", "service_type": "compute"}
-- 获取网络统计：{"action": "get_stats"}"""
+- 获取网络统计：{"action": "get_stats"}""",
 )
 
 # 添加ANP工具
 anp_tool = ANPTool(
     name="service_discovery",
     description="服务发现工具，可以查找和选择计算节点",
-    discovery=discovery
+    discovery=discovery,
 )
 scheduler.add_tool(anp_tool)
+
 
 # 4. 智能任务分配
 def assign_task(task_description):
@@ -74,6 +75,7 @@ def assign_task(task_description):
 
     print(response)
     print("=" * 50)
+
 
 # 测试不同类型的任务
 assign_task("训练一个大型深度学习模型，需要GPU支持")

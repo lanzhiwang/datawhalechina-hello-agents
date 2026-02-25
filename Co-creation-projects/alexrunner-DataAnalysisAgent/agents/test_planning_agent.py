@@ -4,7 +4,6 @@ from agents.react_agent import NewReActAgent
 from agents.agent_prompts import PLAN_AGENT_PROMPT
 from tools.data_exploration import create_data_exploration_registry
 
-
 if __name__ == "__main__":
     llm = HelloAgentsLLM()
     registry = create_data_exploration_registry()
@@ -13,7 +12,7 @@ if __name__ == "__main__":
         llm=llm,
         custom_prompt=PLAN_AGENT_PROMPT,
         tool_registry=registry,
-        max_steps=5
+        max_steps=5,
     )
 
     question = "请开始分析"

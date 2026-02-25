@@ -47,7 +47,9 @@ def dispatch_search(
 
     if isinstance(raw_response, str):
         notices = [raw_response]
-        logger.warning("Search backend %s returned text notice: %s", search_api, raw_response)
+        logger.warning(
+            "Search backend %s returned text notice: %s", search_api, raw_response
+        )
         payload: dict[str, Any] = {
             "results": [],
             "backend": search_api,

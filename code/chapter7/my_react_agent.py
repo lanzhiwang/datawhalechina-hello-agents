@@ -30,6 +30,7 @@ import re
 from typing import Optional, List, Tuple
 from hello_agents import ReActAgent, HelloAgentsLLM, Config, Message, ToolRegistry
 
+
 class MyReActAgent(ReActAgent):
     """
     重写的ReAct Agent - 推理与行动结合的智能体
@@ -43,7 +44,7 @@ class MyReActAgent(ReActAgent):
         system_prompt: Optional[str] = None,
         config: Optional[Config] = None,
         max_steps: int = 5,
-        custom_prompt: Optional[str] = None
+        custom_prompt: Optional[str] = None,
     ):
         super().__init__(name, llm, system_prompt, config)
         self.tool_registry = tool_registry
@@ -67,9 +68,7 @@ class MyReActAgent(ReActAgent):
             tools_desc = self.tool_registry.get_tools_description()
             history_str = "\n".join(self.current_history)
             prompt = self.prompt_template.format(
-                tools=tools_desc,
-                question=input_text,
-                history=history_str
+                tools=tools_desc, question=input_text, history=history_str
             )
 
             # 2. 调用LLM

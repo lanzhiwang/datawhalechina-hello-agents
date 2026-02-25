@@ -13,10 +13,10 @@ sys.path.insert(0, str(project_root))
 
 from hello_agents.tools import RLTrainingTool
 
-
 # ============================================================================
 # 示例1: 加载SFT格式数据集
 # ============================================================================
+
 
 def load_sft_dataset():
     """
@@ -35,7 +35,7 @@ def load_sft_dataset():
         "action": "load_dataset",
         "format": "sft",
         "split": "train",
-        "max_samples": 5
+        "max_samples": 5,
     }
 
     print("加载SFT格式数据集...")
@@ -53,6 +53,7 @@ def load_sft_dataset():
 # ============================================================================
 # 示例2: 加载RL格式数据集
 # ============================================================================
+
 
 def load_rl_dataset():
     """
@@ -73,7 +74,7 @@ def load_rl_dataset():
         "format": "rl",
         "split": "train",
         "max_samples": 5,
-        "model_name": "Qwen/Qwen3-0.6B"
+        "model_name": "Qwen/Qwen3-0.6B",
     }
 
     print("加载RL格式数据集...")
@@ -92,38 +93,39 @@ def load_rl_dataset():
 # 示例3: 加载不同split的数据集
 # ============================================================================
 
+
 def load_different_splits():
     """
     加载训练集和测试集
     """
     tool = RLTrainingTool()
-    
+
     # 加载训练集
     train_config = {
         "action": "load_dataset",
         "format": "sft",
         "split": "train",
-        "max_samples": 100
+        "max_samples": 100,
     }
-    
+
     print("加载训练集...")
     train_result = tool.run(train_config)
     train_data = json.loads(train_result)
     print(f"✅ 训练集: {train_data['dataset_size']} 样本")
-    
+
     # 加载测试集
     test_config = {
         "action": "load_dataset",
         "format": "sft",
         "split": "test",
-        "max_samples": 50
+        "max_samples": 50,
     }
-    
+
     print("\n加载测试集...")
     test_result = tool.run(test_config)
     test_data = json.loads(test_result)
     print(f"✅ 测试集: {test_data['dataset_size']} 样本")
-    
+
     return train_data, test_data
 
 
@@ -131,34 +133,35 @@ def load_different_splits():
 # 示例4: 加载完整数据集
 # ============================================================================
 
+
 def load_full_dataset():
     """
     加载完整数据集 (max_samples=None)
-    
+
     GSM8K数据集:
     - 训练集: ~7500 样本
     - 测试集: ~1300 样本
     """
     tool = RLTrainingTool()
-    
+
     config = {
         "action": "load_dataset",
         "format": "sft",
         "split": "train",
-        "max_samples": None  # None = 使用全部数据
+        "max_samples": None,  # None = 使用全部数据
     }
-    
+
     print("加载完整训练集...")
     print("⚠️  这可能需要一些时间...")
-    
+
     # 实际加载时取消注释
     # result = tool.run(config)
     # result_dict = json.loads(result)
     # print(f"✅ 完整训练集: {result_dict['dataset_size']} 样本")
-    
+
     print("💡 提示: 设置 max_samples=None 可以加载全部数据")
     print("   GSM8K训练集约有 7500 个样本")
-    
+
     return config
 
 
@@ -166,22 +169,23 @@ def load_full_dataset():
 # 示例5: 对比SFT和RL格式
 # ============================================================================
 
+
 def compare_sft_rl_formats():
     """
     对比SFT和RL数据格式的区别
     """
     tool = RLTrainingTool()
 
-    print("="*80)
+    print("=" * 80)
     print("SFT vs RL 数据格式对比")
-    print("="*80)
+    print("=" * 80)
 
     # SFT格式
     sft_config = {
         "action": "load_dataset",
         "format": "sft",
         "split": "train",
-        "max_samples": 1
+        "max_samples": 1,
     }
 
     print("\n1. SFT格式:")
@@ -197,7 +201,7 @@ def compare_sft_rl_formats():
         "format": "rl",
         "split": "train",
         "max_samples": 1,
-        "model_name": "Qwen/Qwen3-0.6B"
+        "model_name": "Qwen/Qwen3-0.6B",
     }
 
     print("\n2. RL格式:")
@@ -218,6 +222,7 @@ def compare_sft_rl_formats():
 # 示例6: 数据集统计信息
 # ============================================================================
 
+
 def dataset_statistics():
     """
     查看数据集的统计信息
@@ -228,7 +233,7 @@ def dataset_statistics():
         "action": "load_dataset",
         "format": "sft",
         "split": "train",
-        "max_samples": 100
+        "max_samples": 100,
     }
 
     print("加载数据集...")
@@ -242,7 +247,7 @@ def dataset_statistics():
     print(f"  任务类型: 数学推理")
 
     print(f"\n💡 提示: 数据集包含以下字段:")
-    for key in result_dict['sample_keys']:
+    for key in result_dict["sample_keys"]:
         print(f"  - {key}")
 
     return result_dict
@@ -253,33 +258,32 @@ def dataset_statistics():
 # ============================================================================
 
 if __name__ == "__main__":
-    print("="*80)
+    print("=" * 80)
     print("示例1: 加载SFT格式数据集")
-    print("="*80)
+    print("=" * 80)
     load_sft_dataset()
-    
-    print("\n" + "="*80)
-    print("示例2: 加载RL格式数据集")
-    print("="*80)
-    load_rl_dataset()
-    
-    print("\n" + "="*80)
-    print("示例3: 加载不同split的数据集")
-    print("="*80)
-    load_different_splits()
-    
-    print("\n" + "="*80)
-    print("示例4: 加载完整数据集")
-    print("="*80)
-    load_full_dataset()
-    
-    print("\n" + "="*80)
-    print("示例5: 对比SFT和RL格式")
-    print("="*80)
-    compare_sft_rl_formats()
-    
-    print("\n" + "="*80)
-    print("示例6: 数据集统计信息")
-    print("="*80)
-    dataset_statistics()
 
+    print("\n" + "=" * 80)
+    print("示例2: 加载RL格式数据集")
+    print("=" * 80)
+    load_rl_dataset()
+
+    print("\n" + "=" * 80)
+    print("示例3: 加载不同split的数据集")
+    print("=" * 80)
+    load_different_splits()
+
+    print("\n" + "=" * 80)
+    print("示例4: 加载完整数据集")
+    print("=" * 80)
+    load_full_dataset()
+
+    print("\n" + "=" * 80)
+    print("示例5: 对比SFT和RL格式")
+    print("=" * 80)
+    compare_sft_rl_formats()
+
+    print("\n" + "=" * 80)
+    print("示例6: 数据集统计信息")
+    print("=" * 80)
+    dataset_statistics()

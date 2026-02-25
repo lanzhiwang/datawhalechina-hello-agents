@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """三国狼人杀中文提示词"""
 
+
 class ChinesePrompts:
     """中文提示词管理类"""
-    
+
     @staticmethod
     def get_role_prompt(role: str, character: str) -> str:
         """获取角色提示词"""
@@ -18,7 +19,7 @@ class ChinesePrompts:
 
 角色特点：
 """
-        
+
         if role == "狼人":
             return base_prompt + f"""
 - 你是狼人阵营，目标是消灭所有好人

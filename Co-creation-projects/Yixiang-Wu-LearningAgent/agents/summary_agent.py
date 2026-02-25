@@ -18,7 +18,9 @@ class SummaryAgent(SimpleAgent):
     - 推荐下一步学习内容
     """
 
-    def __init__(self, llm: HelloAgentsLLM, file_manager: FileManager, streaming: bool = None):
+    def __init__(
+        self, llm: HelloAgentsLLM, file_manager: FileManager, streaming: bool = None
+    ):
         """
         初始化 SummaryAgent
 
@@ -64,6 +66,7 @@ class SummaryAgent(SimpleAgent):
 
         # 添加流式输出支持
         from utils.streaming import should_stream
+
         self.streaming = should_stream(streaming)
 
         # 使用父类初始化
@@ -90,7 +93,10 @@ class SummaryAgent(SimpleAgent):
 
             # 读取知识摘要
             knowledge_summary_path = (
-                self.file_manager.BASE_DIR / domain / "knowledge" / "knowledge_summary.md"
+                self.file_manager.BASE_DIR
+                / domain
+                / "knowledge"
+                / "knowledge_summary.md"
             )
             if knowledge_summary_path.exists():
                 knowledge_summary = knowledge_summary_path.read_text(encoding="utf-8")
@@ -135,6 +141,7 @@ class SummaryAgent(SimpleAgent):
         try:
             if self.streaming:
                 from utils.streaming import stream_response
+
                 return stream_response(self.llm, messages)
             else:
                 return self.llm.invoke(messages).strip()

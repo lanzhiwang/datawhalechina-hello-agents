@@ -41,6 +41,7 @@ dialogue_logger.addHandler(console_handler)
 # 防止日志传播到root logger
 dialogue_logger.propagate = False
 
+
 def log_dialogue_start(npc_name: str, player_message: str):
     """记录对话开始"""
     dialogue_logger.info("=" * 60)
@@ -48,9 +49,11 @@ def log_dialogue_start(npc_name: str, player_message: str):
     dialogue_logger.info("=" * 60)
     dialogue_logger.info(f"📝 玩家消息: {player_message}")
 
+
 def log_affinity(npc_name: str, affinity: float, level: str):
     """记录当前好感度"""
     dialogue_logger.info(f"💖 当前好感度: {affinity:.1f}/100 ({level})")
+
 
 def log_memory_retrieval(npc_name: str, count: int, memories: list = None):
     """记录记忆检索"""
@@ -61,17 +64,21 @@ def log_memory_retrieval(npc_name: str, count: int, memories: list = None):
             content = mem.content[:50] + "..." if len(mem.content) > 50 else mem.content
             dialogue_logger.info(f"    {i}. {content}")
 
+
 def log_generating_response():
     """记录正在生成回复"""
     dialogue_logger.info("🤖 正在生成回复...")
+
 
 def log_npc_response(npc_name: str, response: str):
     """记录NPC回复"""
     dialogue_logger.info(f"💬 {npc_name}回复: {response}")
 
+
 def log_analyzing_affinity():
     """记录正在分析好感度"""
     dialogue_logger.info("📊 正在分析好感度变化...")
+
 
 def log_affinity_change(affinity_result: dict):
     """记录好感度变化"""
@@ -83,33 +90,39 @@ def log_affinity_change(affinity_result: dict):
         )
         dialogue_logger.info(f"  原因: {affinity_result['reason']}")
         dialogue_logger.info(f"  情感: {affinity_result['sentiment']}")
-        
-        if affinity_result['old_level'] != affinity_result['new_level']:
+
+        if affinity_result["old_level"] != affinity_result["new_level"]:
             dialogue_logger.info(
                 f"  🎉 关系等级变化: {affinity_result['old_level']} -> {affinity_result['new_level']}"
             )
     else:
-        dialogue_logger.info(f"  ➡️ 好感度未变化 (当前: {affinity_result.get('affinity', 50.0):.1f})")
+        dialogue_logger.info(
+            f"  ➡️ 好感度未变化 (当前: {affinity_result.get('affinity', 50.0):.1f})"
+        )
         dialogue_logger.info(f"  原因: {affinity_result.get('reason', '无')}")
+
 
 def log_memory_saved(npc_name: str):
     """记录记忆保存"""
     dialogue_logger.info(f"  💾 对话已保存到{npc_name}的记忆中")
+
 
 def log_dialogue_end():
     """记录对话结束"""
     dialogue_logger.info("=" * 60)
     dialogue_logger.info("✅ 对话完成\n")
 
+
 def log_info(message: str):
     """记录普通信息"""
     dialogue_logger.info(message)
+
 
 def log_error(message: str):
     """记录错误信息"""
     dialogue_logger.error(message)
 
+
 # 启动时记录日志文件位置
 print(f"\n📝 对话日志文件: {LOG_FILE}")
 print(f"📂 日志目录: {LOGS_DIR}\n")
-

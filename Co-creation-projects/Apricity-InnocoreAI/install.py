@@ -8,10 +8,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 def install_core_deps():
     """Install only core dependencies"""
     print("Installing core dependencies...")
-    
+
     core_deps = [
         "fastapi==0.104.1",
         "uvicorn[standard]==0.24.0",
@@ -19,9 +20,9 @@ def install_core_deps():
         "python-dotenv==1.0.0",
         "pydantic==2.5.0",
         "httpx==0.25.2",
-        "requests==2.31.0"
+        "requests==2.31.0",
     ]
-    
+
     for dep in core_deps:
         try:
             print(f"  Installing {dep}...")
@@ -30,9 +31,10 @@ def install_core_deps():
         except subprocess.CalledProcessError as e:
             print(f"  [ERROR] Failed to install {dep}: {e}")
             return False
-    
+
     print("[OK] Core dependencies installed successfully")
     return True
+
 
 def create_env_file():
     """Create .env file"""
@@ -51,6 +53,7 @@ DEBUG=True
     else:
         print("[OK] .env file already exists")
 
+
 def create_directories():
     """Create necessary directories"""
     dirs = ["data", "logs"]
@@ -58,26 +61,28 @@ def create_directories():
         Path(dir_path).mkdir(exist_ok=True)
     print("[OK] Directories created")
 
+
 def main():
     print("InnoCore AI - Installation")
     print("=" * 40)
-    
+
     # Install core dependencies
     if not install_core_deps():
         print("[ERROR] Installation failed")
         return
-    
+
     # Create environment file
     create_env_file()
-    
+
     # Create directories
     create_directories()
-    
+
     print("\n[SUCCESS] Installation completed!")
     print("Next steps:")
     print("1. Edit .env file and add your OpenAI API key")
     print("2. Run: python run.py")
     print("3. Open: http://localhost:8000")
+
 
 if __name__ == "__main__":
     main()

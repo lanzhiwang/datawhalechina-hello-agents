@@ -9,16 +9,20 @@ from pathlib import Path
 try:
     from dotenv import load_dotenv  # type: ignore
 except Exception:  # pragma: no cover
+
     def load_dotenv(*args, **kwargs):  # type: ignore
         return False
+
 
 from core.llm import HelloAgentsLLM
 from core.exceptions import HelloAgentsException
 from core.config import Config
 from code_agent.agentic import CodeAgent
-from code_agent.executors.apply_patch_executor import ApplyPatchExecutor, PatchApplyError
+from code_agent.executors.apply_patch_executor import (
+    ApplyPatchExecutor,
+    PatchApplyError,
+)
 from utils.cli_ui import c, hr, PRIMARY, ACCENT, INFO, WARN, ERROR
-
 
 # 匹配 Codex 风格补丁块（宽松，跨行，允许前导空白或代码围栏）
 PATCH_RE = re.compile(r"\s*\*\*\* Begin Patch[\s\S]*?\*\*\* End Patch", re.MULTILINE)
@@ -53,7 +57,9 @@ def _normalize_patch(patch_text: str) -> str:
     out: list[str] = []
     for line in lines:
         stripped = line.strip()
-        if stripped.startswith(("Add File:", "Update File:", "Delete File:")) and not stripped.startswith("*** "):
+        if stripped.startswith(
+            ("Add File:", "Update File:", "Delete File:")
+        ) and not stripped.startswith("*** "):
             out.append("*** " + stripped)
             continue
         out.append(line)
@@ -71,7 +77,11 @@ def _patch_requires_confirmation(patch_text: str) -> bool:
     # MVP: Delete File / too many files / too big => confirm
     if "*** Delete File:" in patch_text:
         return True
-    file_ops = patch_text.count("*** Add File:") + patch_text.count("*** Update File:") + patch_text.count("*** Delete File:")
+    file_ops = (
+        patch_text.count("*** Add File:")
+        + patch_text.count("*** Update File:")
+        + patch_text.count("*** Delete File:")
+    )
     if file_ops >= 6:
         return True
     changed_lines = 0
@@ -87,9 +97,18 @@ def main(argv: list[str] | None = None) -> int:
     初始化 LLM、CodebaseMaintainer 和 PatchExecutor，并进入交互式循环。
     """
     # 1. 解析命令行参数
-    parser = argparse.ArgumentParser(description="HelloAgents-style Code Agent CLI (Codex/Claude-like)")
-    parser.add_argument("--repo", type=str, default=".", help="Repository root (workspace). Default: .")
-    parser.add_argument("--project", type=str, default=None, help="Project name (default: repo folder name)")
+    parser = argparse.ArgumentParser(
+        description="HelloAgents-style Code Agent CLI (Codex/Claude-like)"
+    )
+    parser.add_argument(
+        "--repo", type=str, default=".", help="Repository root (workspace). Default: ."
+    )
+    parser.add_argument(
+        "--project",
+        type=str,
+        default=None,
+        help="Project name (default: repo folder name)",
+    )
     args = parser.parse_args(argv)
 
     # 2. 初始化环境和 LLM
@@ -108,7 +127,12 @@ def main(argv: list[str] | None = None) -> int:
     print(c(hr("=", 80), INFO))
     print(c("HelloAgents Code Agent CLI", PRIMARY))
     print(c(f"workspace: {repo_root}", INFO))
-    print(c(f"LLM: provider={llm.provider} model={llm.model} base_url={llm.base_url}", INFO))
+    print(
+        c(
+            f"LLM: provider={llm.provider} model={llm.model} base_url={llm.base_url}",
+            INFO,
+        )
+    )
     print(c(f"state: {Path(config.helloagents_dir).as_posix()}", INFO))
     print(c(hr("=", 80), INFO))
 
@@ -163,7 +187,7 @@ def main(argv: list[str] | None = None) -> int:
         if getattr(agent, "last_direct_reply", False):
             print(c("🤖 assistant", PRIMARY))
             print(response)
-        
+
         # 7. 提取并应用补丁
         patch_text = _extract_patch(response)
         if not patch_text:
@@ -189,28 +213,42 @@ def main(argv: list[str] | None = None) -> int:
         try:
             res = patch_executor.apply(patch_text)
             print("\n" + c("✅ Patch applied", PRIMARY))
-            print(c(f"files: {', '.join(res.files_changed) if res.files_changed else '(none)'}", INFO))
+            print(
+                c(
+                    f"files: {', '.join(res.files_changed) if res.files_changed else '(none)'}",
+                    INFO,
+                )
+            )
             if res.backups:
-                print(c(f"backups: {len(res.backups)} (in .helloagents/backups/...)", INFO))
+                print(
+                    c(
+                        f"backups: {len(res.backups)} (in .helloagents/backups/...)",
+                        INFO,
+                    )
+                )
 
             # 记录到 NoteTool（action）
-            agent.note_tool.run({
-                "action": "create",
-                "title": "Patch applied",
-                "content": f"User input:\n{user_in}\n\nPatch:\n\n```text\n{patch_text}\n```\n\nFiles:\n"
-                + "\n".join([f"- {p}" for p in res.files_changed]),
-                "note_type": "action",
-                "tags": [project, "patch_applied"],
-            })
+            agent.note_tool.run(
+                {
+                    "action": "create",
+                    "title": "Patch applied",
+                    "content": f"User input:\n{user_in}\n\nPatch:\n\n```text\n{patch_text}\n```\n\nFiles:\n"
+                    + "\n".join([f"- {p}" for p in res.files_changed]),
+                    "note_type": "action",
+                    "tags": [project, "patch_applied"],
+                }
+            )
         except PatchApplyError as e:
             print("\n" + c(f"❌ Patch failed: {e}", ERROR))
-            agent.note_tool.run({
-                "action": "create",
-                "title": "Patch failed",
-                "content": f"Error: {e}\n\nUser input:\n{user_in}\n\nPatch:\n\n```text\n{patch_text}\n```\n",
-                "note_type": "blocker",
-                "tags": [project, "patch_failed"],
-            })
+            agent.note_tool.run(
+                {
+                    "action": "create",
+                    "title": "Patch failed",
+                    "content": f"Error: {e}\n\nUser input:\n{user_in}\n\nPatch:\n\n```text\n{patch_text}\n```\n",
+                    "note_type": "blocker",
+                    "tags": [project, "patch_failed"],
+                }
+            )
             continue
 
     return 0

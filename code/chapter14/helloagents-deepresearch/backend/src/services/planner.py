@@ -21,10 +21,13 @@ TOOL_CALL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+
 class PlanningService:
     """Wraps the planner agent to produce structured TODO items."""
 
-    def __init__(self, planner_agent: ToolAwareSimpleAgent, config: Configuration) -> None:
+    def __init__(
+        self, planner_agent: ToolAwareSimpleAgent, config: Configuration
+    ) -> None:
         self._agent = planner_agent
         self._config = config
 
@@ -74,7 +77,11 @@ class PlanningService:
             id=1,
             title="基础背景梳理",
             intent="收集主题的核心背景与最新动态",
-            query=f"{state.research_topic} 最新进展" if state.research_topic else "基础背景梳理",
+            query=(
+                f"{state.research_topic} 最新进展"
+                if state.research_topic
+                else "基础背景梳理"
+            ),
         )
 
     # ------------------------------------------------------------------

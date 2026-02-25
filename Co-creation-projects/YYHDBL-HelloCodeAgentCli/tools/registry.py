@@ -4,6 +4,7 @@ from typing import Optional, Any, Callable
 import json
 from .base import Tool
 
+
 class ToolRegistry:
     """
     HelloAgents工具注册表
@@ -31,7 +32,9 @@ class ToolRegistry:
         self._tools[tool.name] = tool
         print(f"✅ 工具 '{tool.name}' 已注册。")
 
-    def register_function(self, name: str, description: str, func: Callable[[str], str]):
+    def register_function(
+        self, name: str, description: str, func: Callable[[str], str]
+    ):
         """
         直接注册函数作为工具（简便方式）
 
@@ -43,10 +46,7 @@ class ToolRegistry:
         if name in self._functions:
             print(f"⚠️ 警告：工具 '{name}' 已存在，将被覆盖。")
 
-        self._functions[name] = {
-            "description": description,
-            "func": func
-        }
+        self._functions[name] = {"description": description, "func": func}
         print(f"✅ 工具 '{name}' 已注册。")
 
     def unregister(self, name: str):
@@ -85,10 +85,10 @@ class ToolRegistry:
             tool = self._tools[name]
             try:
                 raw = (input_text or "").strip()
-                
+
                 # 预处理：如果输入包含换行和另一个 Action，只取第一行
-                if '\n' in raw and 'Action:' in raw:
-                    lines = raw.split('\n')
+                if "\n" in raw and "Action:" in raw:
+                    lines = raw.split("\n")
                     raw = lines[0].strip()
 
                 # 1) JSON 直通：允许 ReAct 里用 tool[{"k":"v"}] 精确传参
@@ -108,19 +108,29 @@ class ToolRegistry:
                 # 1c 模型输出为数组包裹一个对象
                 if obj is None and raw.startswith("[") and raw.endswith("]"):
                     arr = _try_json(raw)
-                    if isinstance(arr, list) and len(arr) == 1 and isinstance(arr[0], dict):
+                    if (
+                        isinstance(arr, list)
+                        and len(arr) == 1
+                        and isinstance(arr[0], dict)
+                    ):
                         obj = arr[0]
                 # 1d 错位尾括号（常见：{"a":1,"b":2}])
-                if obj is None and raw.endswith("}]") and raw.count("{") == 1 and raw.count("}") == 2:
+                if (
+                    obj is None
+                    and raw.endswith("}]")
+                    and raw.count("{") == 1
+                    and raw.count("}") == 2
+                ):
                     obj = _try_json(raw[:-1])
                 # 1e 正则兜底：提取首个完整 JSON 对象
                 if obj is None and "{" in raw and "}" in raw:
                     try:
                         import re
+
                         # 使用括号匹配而非简单正则
                         def extract_first_json_object(text: str):
                             """从文本中提取第一个完整的 JSON 对象"""
-                            start = text.find('{')
+                            start = text.find("{")
                             if start == -1:
                                 return None
                             depth = 0
@@ -130,7 +140,7 @@ class ToolRegistry:
                                 if escape:
                                     escape = False
                                     continue
-                                if c == '\\' and in_string:
+                                if c == "\\" and in_string:
                                     escape = True
                                     continue
                                 if c == '"' and not escape:
@@ -138,14 +148,14 @@ class ToolRegistry:
                                     continue
                                 if in_string:
                                     continue
-                                if c == '{':
+                                if c == "{":
                                     depth += 1
-                                elif c == '}':
+                                elif c == "}":
                                     depth -= 1
                                     if depth == 0:
-                                        return text[start:i+1]
+                                        return text[start : i + 1]
                             return None
-                        
+
                         json_str = extract_first_json_object(raw)
                         if json_str:
                             obj = json.loads(json_str)
@@ -167,7 +177,7 @@ class ToolRegistry:
 
                 return (
                     f"错误：工具 '{name}' 需要结构化参数。"
-                    "请使用 JSON 形式传参，例如：tool[{\"param\":\"value\"}]"
+                    '请使用 JSON 形式传参，例如：tool[{"param":"value"}]'
                 )
             except Exception as e:
                 return f"错误：执行工具 '{name}' 时发生异常: {str(e)}"
@@ -215,6 +225,7 @@ class ToolRegistry:
         self._tools.clear()
         self._functions.clear()
         print("🧹 所有工具已清空。")
+
 
 # 全局工具注册表
 global_registry = ToolRegistry()

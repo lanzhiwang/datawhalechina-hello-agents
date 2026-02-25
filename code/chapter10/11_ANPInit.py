@@ -11,7 +11,7 @@ register_service(
     service_type="nlp",
     capabilities=["text_analysis", "sentiment_analysis", "ner"],
     endpoint="http://localhost:8001",
-    metadata={"load": 0.3, "price": 0.01, "version": "1.0.0"}
+    metadata={"load": 0.3, "price": 0.01, "version": "1.0.0"},
 )
 
 register_service(
@@ -21,7 +21,7 @@ register_service(
     service_type="nlp",
     capabilities=["text_analysis", "translation"],
     endpoint="http://localhost:8002",
-    metadata={"load": 0.7, "price": 0.02, "version": "1.1.0"}
+    metadata={"load": 0.7, "price": 0.02, "version": "1.1.0"},
 )
 
 print("✅ 服务注册完成")

@@ -35,4 +35,3 @@ print("\n问题：最新的AI技术发展趋势是什么？")
 print("\n智能体正在思考和搜索...")
 response = agent.run("最新的AI技术发展趋势是什么？")
 print(f"\n回答：{response}")
-

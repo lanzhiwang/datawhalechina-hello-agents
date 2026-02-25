@@ -20,14 +20,11 @@ print(result)
 
 # 2. 搜索仓库
 print("\n🔍 搜索仓库：")
-result = github_tool.run({
-    "action": "call_tool",
-    "tool_name": "search_repositories",
-    "arguments": {
-        "query": "AI agents language:python",
-        "page": 1,
-        "perPage": 3
+result = github_tool.run(
+    {
+        "action": "call_tool",
+        "tool_name": "search_repositories",
+        "arguments": {"query": "AI agents language:python", "page": 1, "perPage": 3},
     }
-})
+)
 print(result)
-

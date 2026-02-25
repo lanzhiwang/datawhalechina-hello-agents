@@ -4,9 +4,9 @@ from hello_agents.protocols import A2AServer
 
 # A2A 服务端：睡眠专家
 sleep_agent = A2AServer(
-    name="sleep_agent",
-    description="睡眠专家，提供助眠建议与睡眠策略"
+    name="sleep_agent", description="睡眠专家，提供助眠建议与睡眠策略"
 )
+
 
 @sleep_agent.skill("answer")
 def answer_sleep_question(text: str) -> str:

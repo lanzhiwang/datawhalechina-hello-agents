@@ -1,14 +1,15 @@
 from hello_agents import SimpleAgent, HelloAgentsLLM
 
+
 class ExerciseAgent(SimpleAgent):
     """
     负责生成编程练习的智能体。
     """
-    
+
     def __init__(self, llm: HelloAgentsLLM):
         """
         初始化 ExerciseAgent。
-        
+
         Args:
             llm: 用于生成练习的大语言模型实例。
         """
@@ -25,8 +26,4 @@ class ExerciseAgent(SimpleAgent):
         
         清晰地格式化你的输出，以便展示给学生。
         """
-        super().__init__(
-            name="Exercise",
-            llm=llm,
-            system_prompt=system_prompt
-        )
+        super().__init__(name="Exercise", llm=llm, system_prompt=system_prompt)

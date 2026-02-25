@@ -7,18 +7,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 def main():
     print("InnoCore AI - Quick Setup")
     print("=" * 30)
-    
+
     # Install basic dependencies without version conflicts
-    basic_deps = [
-        "fastapi",
-        "uvicorn[standard]",
-        "python-multipart",
-        "python-dotenv"
-    ]
-    
+    basic_deps = ["fastapi", "uvicorn[standard]", "python-multipart", "python-dotenv"]
+
     print("Installing basic dependencies...")
     for dep in basic_deps:
         try:
@@ -26,7 +22,7 @@ def main():
             print(f"[OK] {dep}")
         except subprocess.CalledProcessError:
             print(f"[SKIP] {dep} (may already exist)")
-    
+
     # Create .env file
     env_file = Path(".env")
     if not env_file.exists():
@@ -40,17 +36,18 @@ DEBUG=True
         print("[OK] .env file created")
     else:
         print("[OK] .env file exists")
-    
+
     # Create directories
     Path("data").mkdir(exist_ok=True)
     Path("logs").mkdir(exist_ok=True)
     print("[OK] Directories created")
-    
+
     print("\n[SUCCESS] Setup completed!")
     print("Next steps:")
     print("1. Edit .env file and add your OpenAI API key")
     print("2. Run: python run.py")
     print("3. Open: http://localhost:8000")
+
 
 if __name__ == "__main__":
     main()

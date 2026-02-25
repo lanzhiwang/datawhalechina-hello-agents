@@ -27,6 +27,7 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+
 # Data Models
 class OutlineRequest(BaseModel):
     novel_id: str
@@ -34,7 +35,8 @@ class OutlineRequest(BaseModel):
     user_input: str
     tags: Optional[List[str]] = []
     target_length: Optional[int] = 3000
-    style_tags: Dict[str, str] = {} # e.g. {"style": "dark", "tone": "serious"}
+    style_tags: Dict[str, str] = {}  # e.g. {"style": "dark", "tone": "serious"}
+
 
 class OutlineUpdateRequest(BaseModel):
     novel_id: str
@@ -43,12 +45,14 @@ class OutlineUpdateRequest(BaseModel):
     content: str
     tags: Optional[List[str]] = None
 
+
 class ChapterGenerateRequest(BaseModel):
     novel_id: str
     title: str
     user_input: str
     num_chapters: int = 1
     chapter_length: int = 3000
+
 
 class ChapterUpdateRequest(BaseModel):
     novel_id: str
@@ -58,6 +62,7 @@ class ChapterUpdateRequest(BaseModel):
     chapter_title: Optional[str] = None
     summary: Optional[str] = None
     next_chapter_prediction: Optional[str] = None
+
 
 # Manager
 class ProjectManager:
@@ -77,7 +82,12 @@ class ProjectManager:
         if os.path.exists(path):
             with open(path, "r", encoding="utf-8") as f:
                 return json.load(f)
-        return {"novel_id": novel_id, "title": title, "outline_id": None, "chapters": []}
+        return {
+            "novel_id": novel_id,
+            "title": title,
+            "outline_id": None,
+            "chapters": [],
+        }
 
     def save_mapping(self, title, novel_id, data):
         path = self.get_mapping_file(title, novel_id)
@@ -110,25 +120,31 @@ class ProjectManager:
         data["chapters"] = [c for c in data["chapters"] if c["id"] != note_id]
         self.save_mapping(title, novel_id, data)
 
+
 project_manager = ProjectManager()
 
 # Agents
 llm_instance = HelloAgentsLLM(model=os.getenv("LLM_MODEL_ID"))
-outline_agent = OutlineAgent(name="OutlineAgent", llm=llm_instance, workspace="./outputs")
+outline_agent = OutlineAgent(
+    name="OutlineAgent", llm=llm_instance, workspace="./outputs"
+)
 chapter_agent = ChapterGenerateAgent(
-    name="ChapterAgent", 
+    name="ChapterAgent",
     llm=llm_instance,
-    workspace="./outputs", 
-    chapter_length=3000 # Default length, can be overridden in run
+    workspace="./outputs",
+    chapter_length=3000,  # Default length, can be overridden in run
 )
 
 # API Endpoints
+
 
 @app.get("/projects/{title}/{novel_id}")
 def get_project_data(title: str, novel_id: str):
     return project_manager.load_mapping(title, novel_id)
 
+
 # --- Outline ---
+
 
 @app.post("/outline/generate")
 def generate_outline(req: OutlineRequest):
@@ -136,15 +152,16 @@ def generate_outline(req: OutlineRequest):
     run_kwargs = {
         "novel_id": req.novel_id,
         "title": req.title,
-        "target_length": req.target_length
+        "target_length": req.target_length,
     }
     run_kwargs.update(req.style_tags)
-    
+
     response, note_id = outline_agent.run(req.user_input, **run_kwargs)
-    
+
     project_manager.update_outline_mapping(req.title, req.novel_id, note_id)
-    
+
     return {"note_id": note_id, "content": response}
+
 
 @app.get("/outline/{title}/{novel_id}/{note_id}")
 def get_outline(title: str, novel_id: str, note_id: str):
@@ -158,45 +175,51 @@ def get_outline(title: str, novel_id: str, note_id: str):
             content = parts[2].strip()
     return {"content": content}
 
+
 @app.put("/outline/update")
 def update_outline(req: OutlineUpdateRequest):
-    outline_agent.update_outline(req.novel_id, req.note_id, title=req.title, content=req.content, tags=req.tags)
+    outline_agent.update_outline(
+        req.novel_id, req.note_id, title=req.title, content=req.content, tags=req.tags
+    )
     return {"status": "success"}
+
 
 @app.delete("/outline/delete")
 def delete_outline(novel_id: str, title: str, note_id: str):
     outline_agent.del_outline(novel_id, note_id, title=title)
-    
+
     data = project_manager.load_mapping(title, novel_id)
     if data["outline_id"] == note_id:
         data["outline_id"] = None
         project_manager.save_mapping(title, novel_id, data)
     return {"status": "success"}
 
+
 # --- Chapters ---
+
 
 @app.post("/chapter/generate")
 def generate_chapters(req: ChapterGenerateRequest):
     generated_chapters = []
     current_input = req.user_input
-    
+
     for i in range(req.num_chapters):
         try:
             chapter_data, note_id = chapter_agent.run(
-                user_input=current_input, 
-                novel_id=req.novel_id, 
+                user_input=current_input,
+                novel_id=req.novel_id,
                 novel_title=req.title,
-                chapter_length=req.chapter_length
+                chapter_length=req.chapter_length,
             )
-            
+
             # Clear input for subsequent chapters to rely on context/prediction
             if i == 0:
-                current_input = "" 
-            
+                current_input = ""
+
             chapter_info = {
                 "id": note_id,
                 "title": chapter_data.get("title", "Unknown"),
-                "summary": chapter_data.get("summary", "")
+                "summary": chapter_data.get("summary", ""),
             }
             generated_chapters.append(chapter_info)
             project_manager.add_chapter_mapping(req.title, req.novel_id, chapter_info)
@@ -205,8 +228,9 @@ def generate_chapters(req: ChapterGenerateRequest):
             # Stop generating if one fails? Or continue?
             # Probably stop and return what we have.
             break
-        
+
     return {"generated_chapters": generated_chapters}
+
 
 @app.get("/chapter/{title}/{novel_id}/{note_id}")
 def get_chapter(title: str, novel_id: str, note_id: str):
@@ -214,15 +238,16 @@ def get_chapter(title: str, novel_id: str, note_id: str):
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
             content = f.read()
-        
+
         # Remove frontmatter
         if content.startswith("---"):
             parts = content.split("---", 2)
             if len(parts) >= 3:
                 content = parts[2].strip()
-        
+
         return {"content": content}
     raise HTTPException(status_code=404, detail="Chapter not found")
+
 
 @app.put("/chapter/update")
 def update_chapter(req: ChapterUpdateRequest):
@@ -235,27 +260,33 @@ def update_chapter(req: ChapterUpdateRequest):
         update_kwargs["summary"] = req.summary
     if req.next_chapter_prediction is not None:
         update_kwargs["next_chapter_prediction"] = req.next_chapter_prediction
-        
-    chapter_agent.update_chapter(req.novel_id, req.note_id, novel_title=req.title, **update_kwargs)
-    
+
+    chapter_agent.update_chapter(
+        req.novel_id, req.note_id, novel_title=req.title, **update_kwargs
+    )
+
     # Update mapping if title/summary changed
     mapping_update = {}
     if req.chapter_title:
         mapping_update["title"] = req.chapter_title
     if req.summary:
         mapping_update["summary"] = req.summary
-    
+
     if mapping_update:
-        project_manager.update_chapter_mapping(req.title, req.novel_id, req.note_id, mapping_update)
+        project_manager.update_chapter_mapping(
+            req.title, req.novel_id, req.note_id, mapping_update
+        )
 
     return {"status": "success"}
+
 
 @app.delete("/chapter/delete")
 def delete_chapter(novel_id: str, title: str, note_id: str):
     chapter_agent.del_chapter(novel_id, note_id, novel_title=title)
-    
+
     project_manager.remove_chapter_mapping(title, novel_id, note_id)
     return {"status": "success"}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host=os.getenv("HOST"), port=int(os.getenv("PORT")))

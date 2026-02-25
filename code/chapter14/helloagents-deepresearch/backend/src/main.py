@@ -103,7 +103,11 @@ def create_app() -> FastAPI:
             config.llm_provider,
             config.resolved_model() or "unset",
             base_url,
-            (config.search_api.value if isinstance(config.search_api, SearchAPI) else config.search_api),
+            (
+                config.search_api.value
+                if isinstance(config.search_api, SearchAPI)
+                else config.search_api
+            ),
             config.max_web_research_loops,
             config.fetch_full_page,
             config.use_tool_calling,
@@ -181,10 +185,4 @@ app = create_app()
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_level="info")

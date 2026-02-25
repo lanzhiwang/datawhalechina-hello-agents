@@ -34,7 +34,9 @@ class MainAgent(SimpleAgent):
         "exit": ["/exit", "退出", "quit", "exit"],
     }
 
-    def __init__(self, llm: HelloAgentsLLM, file_manager: FileManager, streaming: bool = None):
+    def __init__(
+        self, llm: HelloAgentsLLM, file_manager: FileManager, streaming: bool = None
+    ):
         """
         初始化主 Agent
 
@@ -64,6 +66,7 @@ class MainAgent(SimpleAgent):
 
         # 添加流式输出支持
         from utils.streaming import should_stream
+
         self.streaming = should_stream(streaming)
 
         # 会话状态管理
@@ -248,7 +251,7 @@ class MainAgent(SimpleAgent):
             # 去掉 /vibe 前缀
             for prefix in ["/vibe", "/VIBE", "/Vibe"]:
                 if clean_input.startswith(prefix):
-                    clean_input = clean_input[len(prefix):].strip()
+                    clean_input = clean_input[len(prefix) :].strip()
                     break
 
             # 如果是自然语言形式，询问用户
@@ -270,8 +273,9 @@ class MainAgent(SimpleAgent):
                         return "❌ 无效的模式。请使用 --mode free 或 --mode quiz"
 
             # 启动学习会话
-            agent = VibeLearningAgent(self.llm, self.file_manager,
-                                     streaming=self.streaming)
+            agent = VibeLearningAgent(
+                self.llm, self.file_manager, streaming=self.streaming
+            )
             result = agent.start_session(domain, mode=mode)
 
             # 设置活跃会话
@@ -280,7 +284,7 @@ class MainAgent(SimpleAgent):
                 "mode": mode,
                 "round": 1,
                 "agent": agent,
-                "streaming": self.streaming  # 保存 streaming 设置
+                "streaming": self.streaming,  # 保存 streaming 设置
             }
 
             return result
@@ -308,7 +312,7 @@ class MainAgent(SimpleAgent):
             # 去掉 /summary 前缀
             for prefix in ["/summary", "/SUMMARY", "/Summary"]:
                 if clean_input.startswith(prefix):
-                    clean_input = clean_input[len(prefix):].strip()
+                    clean_input = clean_input[len(prefix) :].strip()
                     break
 
             # 如果是自然语言形式，询问用户
@@ -320,8 +324,7 @@ class MainAgent(SimpleAgent):
             domain = clean_input.split()[0].strip()
 
             # 生成学习总结
-            agent = SummaryAgent(self.llm, self.file_manager,
-                                streaming=self.streaming)
+            agent = SummaryAgent(self.llm, self.file_manager, streaming=self.streaming)
             return agent.run(domain)
 
         except Exception as e:

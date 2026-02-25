@@ -13,12 +13,10 @@ general_agent = MyReflectionAgent(name="我的反思助手", llm=llm)
 code_prompts = {
     "initial": "你是Python专家，请编写函数：{task}",
     "reflect": "请审查代码的算法效率：\n任务：{task}\n代码：{content}",
-    "refine": "请根据反馈优化代码：\n任务：{task}\n反馈：{feedback}"
+    "refine": "请根据反馈优化代码：\n任务：{task}\n反馈：{feedback}",
 }
 code_agent = MyReflectionAgent(
-    name="我的代码生成助手",
-    llm=llm,
-    custom_prompts=code_prompts
+    name="我的代码生成助手", llm=llm, custom_prompts=code_prompts
 )
 
 # 测试使用

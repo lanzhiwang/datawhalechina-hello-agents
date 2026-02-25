@@ -7,9 +7,4 @@ from .embedding import EmbeddingGenerator
 from .text_processor import TextProcessor
 from .citation_formatter import CitationFormatter
 
-__all__ = [
-    "PDFParser",
-    "EmbeddingGenerator", 
-    "TextProcessor",
-    "CitationFormatter"
-]
+__all__ = ["PDFParser", "EmbeddingGenerator", "TextProcessor", "CitationFormatter"]

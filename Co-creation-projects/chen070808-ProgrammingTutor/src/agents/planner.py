@@ -1,14 +1,15 @@
 from hello_agents import SimpleAgent, HelloAgentsLLM
 
+
 class PlannerAgent(SimpleAgent):
     """
     负责创建和更新学习路径的智能体。
     """
-    
+
     def __init__(self, llm: HelloAgentsLLM):
         """
         初始化 PlannerAgent。
-        
+
         Args:
             llm: 用于生成计划的大语言模型实例。
         """
@@ -26,8 +27,4 @@ class PlannerAgent(SimpleAgent):
         1. 回顾用户最近的表现。
         2. 调整剩余模块的进度或深度。
         """
-        super().__init__(
-            name="Planner",
-            llm=llm,
-            system_prompt=system_prompt
-        )
+        super().__init__(name="Planner", llm=llm, system_prompt=system_prompt)

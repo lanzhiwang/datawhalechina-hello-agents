@@ -22,12 +22,16 @@ async def test_weather_server():
             print(f"支持城市: {cities['count']} 个")
 
             # 测试3: 查询北京天气
-            weather = json.loads(await client.call_tool("get_weather", {"city": "北京"}))
+            weather = json.loads(
+                await client.call_tool("get_weather", {"city": "北京"})
+            )
             if "error" not in weather:
                 print(f"\n北京天气: {weather['temperature']}°C, {weather['condition']}")
 
             # 测试4: 查询深圳天气
-            weather = json.loads(await client.call_tool("get_weather", {"city": "深圳"}))
+            weather = json.loads(
+                await client.call_tool("get_weather", {"city": "深圳"})
+            )
             if "error" not in weather:
                 print(f"深圳天气: {weather['temperature']}°C, {weather['condition']}")
 

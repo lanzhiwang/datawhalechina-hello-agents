@@ -8,23 +8,25 @@
 import time
 from hello_agents.tools import RAGTool
 from dotenv import load_dotenv
+
 load_dotenv()
+
 
 class AdvancedSearchDemo:
     """高级检索演示类"""
-    
+
     def __init__(self):
         self.rag_tool = RAGTool(
             knowledge_base_path="./advanced_search_kb",
-            rag_namespace="advanced_search_demo"
+            rag_namespace="advanced_search_demo",
         )
         self._setup_knowledge_base()
-    
+
     def _setup_knowledge_base(self):
         """设置知识库内容"""
         print("📚 设置知识库内容")
         print("=" * 50)
-        
+
         # 添加技术文档
         tech_documents = [
             {
@@ -49,7 +51,7 @@ Transformer的核心是自注意力机制（Self-Attention），它允许模型�
 - 文本摘要
 - 问答系统
 - 代码生成
-"""
+""",
             },
             {
                 "id": "deep_learning_optimization",
@@ -79,7 +81,7 @@ Transformer的核心是自注意力机制（Self-Attention），它允许模型�
 - Dropout：随机丢弃神经元防止过拟合
 - Batch Normalization：标准化层输入
 - Weight Decay：权重衰减正则化
-"""
+""",
             },
             {
                 "id": "nlp_applications",
@@ -117,7 +119,7 @@ Transformer的核心是自注意力机制（Self-Attention），它允许模型�
 - Seq2Seq模型
 - 注意力机制
 - Transformer架构
-"""
+""",
             },
             {
                 "id": "computer_vision",
@@ -159,288 +161,316 @@ Transformer的核心是自注意力机制（Self-Attention），它允许模型�
 
 ### 实例分割
 - Mask R-CNN：在Faster R-CNN基础上添加分割分支
-"""
-            }
+""",
+            },
         ]
-        
+
         # 批量添加文档
         for doc in tech_documents:
-            result = self.rag_tool.run({"action":"add_text",
-                                         "text":doc["content"],
-                                         "document_id":doc["id"]})
+            result = self.rag_tool.run(
+                {"action": "add_text", "text": doc["content"], "document_id": doc["id"]}
+            )
             print(f"✅ 添加文档: {doc['id']}")
-        
+
         print(f"📊 知识库设置完成，共添加 {len(tech_documents)} 个文档")
-    
+
     def demonstrate_basic_search(self):
         """演示基础搜索功能"""
         print("\n🔍 基础搜索功能演示")
         print("-" * 50)
-        
+
         print("基础搜索特点:")
         print("• 向量相似度匹配")
         print("• 基于嵌入的语义理解")
         print("• 相关性排序")
         print("• 快速响应")
-        
+
         basic_queries = [
             ("注意力机制", "测试精确概念匹配"),
             ("深度学习优化", "测试主题匹配"),
             ("图像分类CNN", "测试多词匹配"),
-            ("机器翻译模型", "测试跨文档匹配")
+            ("机器翻译模型", "测试跨文档匹配"),
         ]
-        
+
         print(f"\n🔍 基础搜索测试:")
         for query, description in basic_queries:
             print(f"\n查询: '{query}' ({description})")
-            
+
             start_time = time.time()
-            result = self.rag_tool.run({"action":"search",
-                                         "query":query,
-                                         "limit":2,
-                                         "enable_advanced_search":False})
+            result = self.rag_tool.run(
+                {
+                    "action": "search",
+                    "query": query,
+                    "limit": 2,
+                    "enable_advanced_search": False,
+                }
+            )
             search_time = time.time() - start_time
-            
+
             print(f"耗时: {search_time:.3f}秒")
             print(f"结果: {result[:200]}...")
-    
+
     def demonstrate_mqe_search(self):
         """演示多查询扩展（MQE）搜索"""
         print("\n🔄 多查询扩展（MQE）搜索演示")
         print("-" * 50)
-        
+
         print("MQE搜索原理:")
         print("• 🤖 使用LLM生成语义等价查询")
         print("• 🔍 并行执行多个查询")
         print("• 📊 合并和去重结果")
         print("• 🎯 提高召回率和覆盖面")
-        
+
         mqe_queries = [
             ("深度学习", "测试概念扩展"),
             ("优化算法", "测试技术扩展"),
-            ("神经网络", "测试架构扩展")
+            ("神经网络", "测试架构扩展"),
         ]
-        
+
         print(f"\n🔄 MQE搜索测试:")
         for query, description in mqe_queries:
             print(f"\n查询: '{query}' ({description})")
-            
+
             # 基础搜索对比
             start_time = time.time()
-            basic_result = self.rag_tool.run({"action":"search",
-                                               "query":query,
-                                               "limit":3,
-                                               "enable_advanced_search":False})
+            basic_result = self.rag_tool.run(
+                {
+                    "action": "search",
+                    "query": query,
+                    "limit": 3,
+                    "enable_advanced_search": False,
+                }
+            )
             basic_time = time.time() - start_time
-            
+
             # MQE搜索
             start_time = time.time()
-            mqe_result = self.rag_tool.run({"action":"search",
-                                             "query":query,
-                                             "limit":3,
-                                             "enable_advanced_search":True})
+            mqe_result = self.rag_tool.run(
+                {
+                    "action": "search",
+                    "query": query,
+                    "limit": 3,
+                    "enable_advanced_search": True,
+                }
+            )
             mqe_time = time.time() - start_time
-            
+
             print(f"基础搜索耗时: {basic_time:.3f}秒")
             print(f"MQE搜索耗时: {mqe_time:.3f}秒")
             print(f"基础结果: {basic_result[:150]}...")
             print(f"MQE结果: {mqe_result[:150]}...")
             print(f"性能对比: MQE搜索耗时是基础搜索的 {mqe_time/basic_time:.1f} 倍")
-    
+
     def demonstrate_hyde_search(self):
         """演示假设文档嵌入（HyDE）搜索"""
         print("\n📝 假设文档嵌入（HyDE）搜索演示")
         print("-" * 50)
-        
+
         print("HyDE搜索原理:")
         print("• 🤖 LLM生成假设性答案文档")
         print("• 📄 将假设文档作为查询向量")
         print("• 🎯 改善查询-文档匹配效果")
         print("• 🔍 特别适合复杂问题检索")
-        
+
         hyde_queries = [
             ("如何提高深度学习模型的性能？", "测试方法性问题"),
             ("Transformer相比RNN有什么优势？", "测试对比性问题"),
-            ("什么是计算机视觉中的目标检测？", "测试定义性问题")
+            ("什么是计算机视觉中的目标检测？", "测试定义性问题"),
         ]
-        
+
         print(f"\n📝 HyDE搜索测试:")
         for query, description in hyde_queries:
             print(f"\n查询: '{query}' ({description})")
-            
+
             # 使用智能问答（内部使用HyDE）
             start_time = time.time()
-            hyde_result = self.rag_tool.run({"action":"ask",
-                                              "question":query,
-                                              "limit":3,
-                                              "enable_advanced_search":True})
+            hyde_result = self.rag_tool.run(
+                {
+                    "action": "ask",
+                    "question": query,
+                    "limit": 3,
+                    "enable_advanced_search": True,
+                }
+            )
             hyde_time = time.time() - start_time
-            
+
             print(f"HyDE问答耗时: {hyde_time:.3f}秒")
             print(f"HyDE结果: {hyde_result[:300]}...")
-    
+
     def demonstrate_combined_advanced_search(self):
         """演示组合高级搜索"""
         print("\n🚀 组合高级搜索演示")
         print("-" * 50)
-        
+
         print("组合搜索策略:")
         print("• 🔄 MQE + HyDE 双重扩展")
         print("• 📊 多策略结果融合")
         print("• 🎯 最大化检索效果")
         print("• ⚡ 智能缓存优化")
-        
+
         complex_queries = [
             ("深度学习中的注意力机制是如何工作的？", "复杂技术问题"),
             ("比较不同的梯度下降优化算法", "对比分析问题"),
-            ("计算机视觉和自然语言处理的共同技术", "跨领域问题")
+            ("计算机视觉和自然语言处理的共同技术", "跨领域问题"),
         ]
-        
+
         print(f"\n🚀 组合高级搜索测试:")
         for query, description in complex_queries:
             print(f"\n查询: '{query}' ({description})")
-            
+
             # 组合高级搜索
             start_time = time.time()
-            
+
             # 先进行高级搜索获取相关片段
-            search_result = self.rag_tool.run({"action":"search",
-                                                "query":query,
-                                                "limit":4,
-                                                "enable_advanced_search":True})
-            
+            search_result = self.rag_tool.run(
+                {
+                    "action": "search",
+                    "query": query,
+                    "limit": 4,
+                    "enable_advanced_search": True,
+                }
+            )
+
             # 再进行智能问答生成完整答案
-            qa_result = self.rag_tool.run({"action":"ask",
-                                            "question":query,
-                                            "limit":4,
-                                            "enable_advanced_search":True,
-                                            "include_citations":True})
-            
+            qa_result = self.rag_tool.run(
+                {
+                    "action": "ask",
+                    "question": query,
+                    "limit": 4,
+                    "enable_advanced_search": True,
+                    "include_citations": True,
+                }
+            )
+
             combined_time = time.time() - start_time
-            
+
             print(f"组合搜索耗时: {combined_time:.3f}秒")
             print(f"搜索片段: {search_result[:200]}...")
             print(f"智能问答: {qa_result[:400]}...")
-    
+
     def demonstrate_search_performance_analysis(self):
         """演示搜索性能分析"""
         print("\n📊 搜索性能分析")
         print("-" * 50)
-        
+
         print("性能分析指标:")
         print("• ⏱️ 响应时间对比")
         print("• 🎯 检索质量评估")
         print("• 💾 资源使用情况")
         print("• 📈 扩展性分析")
-        
+
         # 性能测试查询
         performance_queries = [
             "机器学习",
             "深度学习优化算法",
             "Transformer注意力机制原理",
-            "计算机视觉目标检测方法比较"
+            "计算机视觉目标检测方法比较",
         ]
-        
+
         print(f"\n📊 性能对比测试:")
-        
+
         # 测试不同搜索策略的性能
         strategies = [
             ("基础搜索", {"enable_advanced_search": False}),
-            ("高级搜索", {"enable_advanced_search": True})
+            ("高级搜索", {"enable_advanced_search": True}),
         ]
-        
+
         performance_results = {}
-        
+
         for strategy_name, params in strategies:
             print(f"\n{strategy_name}性能测试:")
             strategy_times = []
-            
+
             for query in performance_queries:
                 start_time = time.time()
-                
-                result = self.rag_tool.run({"action":"search",
-                                             "query":query,
-                                             "limit":3,
-                                             **params})
-                
+
+                result = self.rag_tool.run(
+                    {"action": "search", "query": query, "limit": 3, **params}
+                )
+
                 query_time = time.time() - start_time
                 strategy_times.append(query_time)
-                
+
                 print(f"  查询: '{query[:20]}...' 耗时: {query_time:.3f}秒")
-            
+
             avg_time = sum(strategy_times) / len(strategy_times)
             performance_results[strategy_name] = {
                 "times": strategy_times,
-                "average": avg_time
+                "average": avg_time,
             }
-            
+
             print(f"  平均耗时: {avg_time:.3f}秒")
-        
+
         # 性能对比分析
         print(f"\n📈 性能对比分析:")
         basic_avg = performance_results["基础搜索"]["average"]
         advanced_avg = performance_results["高级搜索"]["average"]
-        
+
         print(f"基础搜索平均耗时: {basic_avg:.3f}秒")
         print(f"高级搜索平均耗时: {advanced_avg:.3f}秒")
         print(f"性能比值: {advanced_avg/basic_avg:.1f}x")
-        print(f"分析: 高级搜索通过多策略提升检索质量，耗时增加 {((advanced_avg/basic_avg-1)*100):.0f}%")
-        
+        print(
+            f"分析: 高级搜索通过多策略提升检索质量，耗时增加 {((advanced_avg/basic_avg-1)*100):.0f}%"
+        )
+
         # 获取系统统计
-        stats = self.rag_tool.run({"action":"stats"})
+        stats = self.rag_tool.run({"action": "stats"})
         print(f"\n📊 系统统计: {stats}")
+
 
 def main():
     """主函数"""
     print("🚀 RAGTool高级检索策略演示")
     print("展示MQE、HyDE等先进检索技术的实现和应用")
     print("=" * 70)
-    
+
     try:
         demo = AdvancedSearchDemo()
-        
+
         # 1. 基础搜索演示
         demo.demonstrate_basic_search()
-        
+
         # 2. MQE搜索演示
         demo.demonstrate_mqe_search()
-        
+
         # 3. HyDE搜索演示
         demo.demonstrate_hyde_search()
-        
+
         # 4. 组合高级搜索演示
         demo.demonstrate_combined_advanced_search()
-        
+
         # 5. 搜索性能分析
         demo.demonstrate_search_performance_analysis()
-        
+
         print("\n" + "=" * 70)
         print("🎉 高级检索策略演示完成！")
         print("=" * 70)
-        
+
         print("\n✨ 高级检索核心技术:")
         print("1. 🔄 MQE多查询扩展 - 提高召回率和覆盖面")
         print("2. 📝 HyDE假设文档嵌入 - 改善查询匹配效果")
         print("3. 🚀 组合搜索策略 - 多技术融合优化")
         print("4. 📊 智能结果排序 - 多因素评分机制")
         print("5. ⚡ 性能优化 - 缓存和批量处理")
-        
+
         print("\n🎯 技术优势:")
         print("• 语义理解 - 超越关键词匹配的语义检索")
         print("• 查询扩展 - 自动生成相关查询提升召回")
         print("• 上下文感知 - 理解查询意图和上下文")
         print("• 质量优化 - 多策略融合提升检索质量")
-        
+
         print("\n💡 应用场景:")
         print("• 技术文档问答 - 复杂技术问题的精准回答")
         print("• 知识发现 - 从大量文档中发现相关知识")
         print("• 智能搜索 - 理解用户意图的智能搜索")
         print("• 内容推荐 - 基于语义相似度的内容推荐")
-        
+
     except Exception as e:
         print(f"\n❌ 演示过程中发生错误: {e}")
         import traceback
+
         traceback.print_exc()
+
 
 if __name__ == "__main__":
     main()

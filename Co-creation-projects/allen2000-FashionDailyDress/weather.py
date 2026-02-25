@@ -4,10 +4,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class Weather:
     """天气查询类，封装OpenWeatherMap API功能"""
-    
-    def __init__(self, api_key=None, unit='metric'):
+
+    def __init__(self, api_key=None, unit="metric"):
         """
         初始化Weather类
         :param api_key: OpenWeatherMap API密钥，默认为环境变量中的OPENWEATHER_API_KEY
@@ -22,7 +23,7 @@ class Weather:
         if self.demo_mode:
             print("⚠️  警告: 未设置API密钥，使用演示模式")
             print("   请设置OPENWEATHER_API_KEY环境变量以获得真实天气数据")
-    
+
     def get_weather(self, city_name):
         """
         查询指定城市的天气信息
@@ -32,12 +33,8 @@ class Weather:
         # 如果是演示模式，使用模拟数据
         if self.demo_mode:
             return self._get_demo_weather()
-        
-        params = {
-            "q": city_name,
-            "appid": self.api_key,
-            "units": self.unit
-        }
+
+        params = {"q": city_name, "appid": self.api_key, "units": self.unit}
 
         try:
             response = requests.get(self.base_url, params=params)
@@ -50,7 +47,7 @@ class Weather:
 
         except Exception as e:
             return f"请求失败: {str(e)}"
-    
+
     def get_weather_details(self, city_name):
         """
         获取详细的天气数据（字典格式）
@@ -60,12 +57,8 @@ class Weather:
         # 如果是演示模式，使用模拟数据
         if self.demo_mode:
             return self._get_demo_weather()
-        
-        params = {
-            "q": city_name,
-            "appid": self.api_key,
-            "units": self.unit
-        }
+
+        params = {"q": city_name, "appid": self.api_key, "units": self.unit}
 
         try:
             response = requests.get(self.base_url, params=params)
@@ -81,36 +74,37 @@ class Weather:
 
     def _get_demo_weather(self):
         return {
-            "city": 'shanghai',
+            "city": "shanghai",
             "temperature": 25,
             "temperature_unit": "°C",
             "description": "晴天",
             "humidity": 60,
             "wind_speed": 10,
-            "wind_unit": "m/s"
+            "wind_unit": "m/s",
         }
+
     def _parse_weather_data(self, data):
         """
         解析天气数据为字典格式
         :param data: API返回的原始数据
         :return: 解析后的天气数据字典
         """
-        weather_desc = data['weather'][0]['description'].title()
-        temp = data['main']['temp']
-        humidity = data['main']['humidity']
-        wind_speed = data['wind']['speed']
-        city = data['name']
-        
+        weather_desc = data["weather"][0]["description"].title()
+        temp = data["main"]["temp"]
+        humidity = data["main"]["humidity"]
+        wind_speed = data["wind"]["speed"]
+        city = data["name"]
+
         return {
             "city": city,
             "temperature": temp,
-            "temperature_unit": "°C" if self.unit == 'metric' else "°F",
+            "temperature_unit": "°C" if self.unit == "metric" else "°F",
             "description": weather_desc,
             "humidity": humidity,
             "wind_speed": wind_speed,
-            "wind_unit": "m/s"
+            "wind_unit": "m/s",
         }
-    
+
     def _format_weather_data(self, data):
         """
         格式化天气数据为字符串
@@ -118,7 +112,7 @@ class Weather:
         :return: 格式化后的天气信息字符串
         """
         weather_data = self._parse_weather_data(data)
-        
+
         return (
             f"🏙️ 城市: {weather_data['city']}\n"
             f"🌡️ 温度: {weather_data['temperature']}{weather_data['temperature_unit']}\n"
@@ -126,16 +120,16 @@ class Weather:
             f"💧 湿度: {weather_data['humidity']}%\n"
             f"🌬️ 风速: {weather_data['wind_speed']} {weather_data['wind_unit']}"
         )
-    
+
     def set_unit(self, unit):
         """
         设置温度单位
         :param unit: 温度单位（metric=摄氏，imperial=华氏）
         """
-        if unit not in ['metric', 'imperial']:
+        if unit not in ["metric", "imperial"]:
             raise ValueError("单位必须是 'metric' 或 'imperial'")
         self.unit = unit
-    
+
     def set_api_key(self, api_key):
         """
         设置API密钥
@@ -144,7 +138,9 @@ class Weather:
         self.api_key = api_key
 
 
-def get_weather(city_name, api_key=os.environ.get("OPENWEATHER_API_KEY"), unit='metric'):
+def get_weather(
+    city_name, api_key=os.environ.get("OPENWEATHER_API_KEY"), unit="metric"
+):
     """
     向后兼容的函数，使用Weather类实现
     :param city_name: 城市名称（英文）

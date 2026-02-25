@@ -17,7 +17,6 @@ from typing import Any, Dict, List, Optional
 
 from ..base import Tool, ToolParameter
 
-
 STATUSES = ("pending", "in_progress", "completed")
 
 
@@ -57,11 +56,36 @@ class TodoTool(Tool):
 
     def get_parameters(self) -> List[ToolParameter]:
         return [
-            ToolParameter(name="action", type="string", description="add | list | update", required=True),
-            ToolParameter(name="title", type="string", description="待办标题（add必填，update可选）", required=False),
-            ToolParameter(name="desc", type="string", description="待办描述（可选）", required=False),
-            ToolParameter(name="status", type="string", description="pending|in_progress|completed（update可选）", required=False),
-            ToolParameter(name="id", type="integer", description="要更新的待办ID（update必填）", required=False),
+            ToolParameter(
+                name="action",
+                type="string",
+                description="add | list | update",
+                required=True,
+            ),
+            ToolParameter(
+                name="title",
+                type="string",
+                description="待办标题（add必填，update可选）",
+                required=False,
+            ),
+            ToolParameter(
+                name="desc",
+                type="string",
+                description="待办描述（可选）",
+                required=False,
+            ),
+            ToolParameter(
+                name="status",
+                type="string",
+                description="pending|in_progress|completed（update可选）",
+                required=False,
+            ),
+            ToolParameter(
+                name="id",
+                type="integer",
+                description="要更新的待办ID（update必填）",
+                required=False,
+            ),
         ]
 
     # ---------------- core ops ----------------
@@ -70,7 +94,11 @@ class TodoTool(Tool):
             return "参数缺失，需包含 action（add/list/update）。"
         action = str(parameters.get("action", "")).strip().lower().rstrip("]")
         if action == "add":
-            return self._add(title=parameters.get("title", ""), desc=parameters.get("desc", ""), status=parameters.get("status", "pending"))
+            return self._add(
+                title=parameters.get("title", ""),
+                desc=parameters.get("desc", ""),
+                status=parameters.get("status", "pending"),
+            )
         if action == "list":
             return self._list(status_filter=parameters.get("status"))
         if action == "update":
@@ -91,7 +119,9 @@ class TodoTool(Tool):
         tmp = self.data_file.with_suffix(".tmp")
         if self.data_file.exists():
             try:
-                self.backup_file.write_text(self.data_file.read_text(encoding="utf-8"), encoding="utf-8")
+                self.backup_file.write_text(
+                    self.data_file.read_text(encoding="utf-8"), encoding="utf-8"
+                )
             except Exception:
                 pass
         tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -104,12 +134,18 @@ class TodoTool(Tool):
     def _now(self) -> str:
         return datetime.now().isoformat(timespec="seconds")
 
-    def _enforce_single_in_progress(self, items: List[TodoItem], incoming_status: str, incoming_id: Optional[int]) -> Optional[str]:
+    def _enforce_single_in_progress(
+        self, items: List[TodoItem], incoming_status: str, incoming_id: Optional[int]
+    ) -> Optional[str]:
         if incoming_status != "in_progress":
             return None
         for it in items:
-            if it.status == "in_progress" and (incoming_id is None or it.id != incoming_id):
-                return f"已有进行中的任务 #{it.id}《{it.title}》。先完成/更新它后再切换。"
+            if it.status == "in_progress" and (
+                incoming_id is None or it.id != incoming_id
+            ):
+                return (
+                    f"已有进行中的任务 #{it.id}《{it.title}》。先完成/更新它后再切换。"
+                )
         return None
 
     # ---------------- actions ----------------
@@ -124,12 +160,25 @@ class TodoTool(Tool):
         if conflict:
             return f"❌ add 失败：{conflict}"
         now = self._now()
-        new_item = TodoItem(id=self._next_id(items), title=title, desc=desc or "", status=status, created_at=now, updated_at=now)
+        new_item = TodoItem(
+            id=self._next_id(items),
+            title=title,
+            desc=desc or "",
+            status=status,
+            created_at=now,
+            updated_at=now,
+        )
         items.append(new_item)
         self._save({"items": [asdict(i) for i in items]})
         return f"✅ 已添加 #{new_item.id} [{new_item.status}] {new_item.title}"
 
-    def _update(self, todo_id: Any, title: Optional[str], desc: Optional[str], status: Optional[str]) -> str:
+    def _update(
+        self,
+        todo_id: Any,
+        title: Optional[str],
+        desc: Optional[str],
+        status: Optional[str],
+    ) -> str:
         try:
             tid = int(todo_id)
         except Exception:
@@ -208,6 +257,10 @@ class TodoTool(Tool):
                     lines.append(line_desc)
             return "\n".join(lines)
 
-        parts = [fmt("in_progress", groups["in_progress"]), fmt("pending", groups["pending"]), fmt("completed", groups["completed"])]
+        parts = [
+            fmt("in_progress", groups["in_progress"]),
+            fmt("pending", groups["pending"]),
+            fmt("completed", groups["completed"]),
+        ]
         out = "\n\n".join([p for p in parts if p])
         return out or "暂无待办。"

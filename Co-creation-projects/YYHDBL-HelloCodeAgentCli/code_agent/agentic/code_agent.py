@@ -19,10 +19,10 @@ from tools.builtin.todo_tool import TodoTool
 from tools.builtin.context_fetch_tool import ContextFetchTool
 
 
-
 @dataclass
 class CodeAgentPaths:
     """CodeAgent 路径配置类，集中管理所有相关目录路径"""
+
     repo_root: Path
     notes_dir: Path
     memory_dir: Path
@@ -48,7 +48,12 @@ class CodeAgent:
     - 规划能力作为可选工具 (`plan`) 暴露给模型，模型可按需调用。
     """
 
-    def __init__(self, repo_root: Path, llm: Optional[HelloAgentsLLM] = None, config: Optional[Config] = None):
+    def __init__(
+        self,
+        repo_root: Path,
+        llm: Optional[HelloAgentsLLM] = None,
+        config: Optional[Config] = None,
+    ):
         """
         初始化 CodeAgent
 
@@ -62,7 +67,11 @@ class CodeAgent:
 
         # 初始化目录结构
         helloagents_dir = Path(self.config.helloagents_dir)
-        state_root = helloagents_dir if helloagents_dir.is_absolute() else (repo_root / helloagents_dir)
+        state_root = (
+            helloagents_dir
+            if helloagents_dir.is_absolute()
+            else (repo_root / helloagents_dir)
+        )
         self.paths = CodeAgentPaths(
             repo_root=repo_root,
             notes_dir=state_root / "notes",
@@ -96,9 +105,11 @@ class CodeAgent:
         self.registry = ToolRegistry()
         self.registry.register_tool(self.terminal_tool)
         self.registry.register_tool(self.note_tool)
-        self.registry.register_tool(PlanTool(self.llm, prompt_path=str(self.paths.prompts_dir / "plan.md")))
+        self.registry.register_tool(
+            PlanTool(self.llm, prompt_path=str(self.paths.prompts_dir / "plan.md"))
+        )
         self.registry.register_tool(self.todo_tool)
-        
+
         # 注册上下文获取工具（让模型按需探索）
         self.context_fetch_tool = ContextFetchTool(
             workspace=str(self.paths.repo_root),
@@ -126,9 +137,13 @@ class CodeAgent:
 
         # 加载自定义 Prompt 并初始化 ReActAgent
         react_prompt = (self.paths.prompts_dir / "react.md").read_text(encoding="utf-8")
-        summarize_prompt = (self.paths.prompts_dir / "summarize_observation.md").read_text(encoding="utf-8")
+        summarize_prompt = (
+            self.paths.prompts_dir / "summarize_observation.md"
+        ).read_text(encoding="utf-8")
 
-        def _summarize_observation(tool_name: str, tool_input: str, observation: str) -> str:
+        def _summarize_observation(
+            tool_name: str, tool_input: str, observation: str
+        ) -> str:
             """
             使用 LLM 压缩工具输出 (避免将巨大的原始输出放入 Prompt)
             """
@@ -140,13 +155,16 @@ class CodeAgent:
                 f"Input: {tool_input}\n\n"
                 f"Output:\n{truncated}"
             )
-            return self.llm.invoke(
-                [
-                    {"role": "system", "content": summarize_prompt},
-                    {"role": "user", "content": user_msg},
-                ],
-                max_tokens=400,
-            ) or ""
+            return (
+                self.llm.invoke(
+                    [
+                        {"role": "system", "content": summarize_prompt},
+                        {"role": "user", "content": user_msg},
+                    ],
+                    max_tokens=400,
+                )
+                or ""
+            )
 
         self.react = ReActAgent(
             name="code_agent",
@@ -187,7 +205,9 @@ class CodeAgent:
     def _reply_with_recent_history(self, limit: int = 6) -> str:
         """生成最近对话的简要回顾"""
         # 只取用户/助手消息（跳过系统等）
-        items = [m for m in self.history if m.role in {"user", "assistant"}][-limit * 2 :]
+        items = [m for m in self.history if m.role in {"user", "assistant"}][
+            -limit * 2 :
+        ]
         if not items:
             return "目前还没有可回顾的对话历史。"
         lines = []
@@ -199,7 +219,7 @@ class CodeAgent:
     # 以下两个方法在 lazy_fetch 模式下不再主动调用，
     # 扩展上下文改由模型通过 context_fetch 工具按需获取。
     # 保留这些方法以支持 lazy_fetch=False 的传统模式。
-    
+
     def _note_packets(self, query: str) -> List[ContextPacket]:
         """检索相关笔记并封装为 ContextPacket"""
         packets: List[ContextPacket] = []
@@ -207,13 +227,24 @@ class CodeAgent:
             return packets
         try:
             # 获取最近的阻碍 (Blocker)
-            blockers = self.note_tool.run({"action": "list", "note_type": "blocker", "limit": 2})
+            blockers = self.note_tool.run(
+                {"action": "list", "note_type": "blocker", "limit": 2}
+            )
             if blockers and isinstance(blockers, str) and "暂无" not in blockers:
-                packets.append(ContextPacket(content=f"[Notes:blocker]\n{blockers}", metadata={"source": "note"}))
+                packets.append(
+                    ContextPacket(
+                        content=f"[Notes:blocker]\n{blockers}",
+                        metadata={"source": "note"},
+                    )
+                )
             # 搜索相关笔记
             hits = self.note_tool.run({"action": "search", "query": query, "limit": 3})
             if hits and isinstance(hits, str) and "未找到" not in hits:
-                packets.append(ContextPacket(content=f"[Notes:search]\n{hits}", metadata={"source": "note"}))
+                packets.append(
+                    ContextPacket(
+                        content=f"[Notes:search]\n{hits}", metadata={"source": "note"}
+                    )
+                )
         except Exception:
             pass
         return packets
@@ -225,10 +256,20 @@ class CodeAgent:
             return packets
         try:
             hits = self.memory_tool.run(
-                {"action": "search", "query": query, "memory_types": self.memory_tool.memory_types, "limit": 5, "min_importance": 0.0}
+                {
+                    "action": "search",
+                    "query": query,
+                    "memory_types": self.memory_tool.memory_types,
+                    "limit": 5,
+                    "min_importance": 0.0,
+                }
             )
             if hits and isinstance(hits, str) and "未找到" not in hits:
-                packets.append(ContextPacket(content=f"[Memory]\n{hits}", metadata={"source": "memory"}))
+                packets.append(
+                    ContextPacket(
+                        content=f"[Memory]\n{hits}", metadata={"source": "memory"}
+                    )
+                )
         except Exception:
             pass
         return packets
@@ -240,7 +281,12 @@ class CodeAgent:
             "session_id": self.session_id,
             "updated_at": datetime.now().isoformat(),
             "history": [
-                {"role": m.role, "content": m.content, "timestamp": m.timestamp.isoformat()} for m in self.history[-50:]
+                {
+                    "role": m.role,
+                    "content": m.content,
+                    "timestamp": m.timestamp.isoformat(),
+                }
+                for m in self.history[-50:]
             ],
         }
         p.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -261,8 +307,12 @@ class CodeAgent:
         if self._is_chitchat(user_input):
             self.last_direct_reply = True
             reply = "你好！我是 Code Agent，可以帮你按需探索代码仓库、生成补丁并在确认后落盘。你想做什么？（例如：分析项目结构 / 搜索某个类 / 修复一个报错）"
-            self.history.append(Message(content=user_input, role="user", timestamp=datetime.now()))
-            self.history.append(Message(content=reply, role="assistant", timestamp=datetime.now()))
+            self.history.append(
+                Message(content=user_input, role="user", timestamp=datetime.now())
+            )
+            self.history.append(
+                Message(content=reply, role="assistant", timestamp=datetime.now())
+            )
             if len(self.history) > 50:
                 self.history = self.history[-50:]
             self._persist_session()
@@ -273,8 +323,12 @@ class CodeAgent:
         if self._is_history_query(user_input):
             self.last_direct_reply = True
             reply = self._reply_with_recent_history(limit=6)
-            self.history.append(Message(content=user_input, role="user", timestamp=datetime.now()))
-            self.history.append(Message(content=reply, role="assistant", timestamp=datetime.now()))
+            self.history.append(
+                Message(content=user_input, role="user", timestamp=datetime.now())
+            )
+            self.history.append(
+                Message(content=reply, role="assistant", timestamp=datetime.now())
+            )
             if len(self.history) > 50:
                 self.history = self.history[-50:]
             self._persist_session()
@@ -282,7 +336,16 @@ class CodeAgent:
 
         # 若检测到明显多步骤词汇，向模型追加轻量提示（不强制，只提高倾向）
         multistep_hint = ""
-        multi_patterns = ["分步", "步骤", "三步", "计划", "改造", "完成后", "多步", "多步骤"]
+        multi_patterns = [
+            "分步",
+            "步骤",
+            "三步",
+            "计划",
+            "改造",
+            "完成后",
+            "多步",
+            "多步骤",
+        ]
         if any(p in user_input for p in multi_patterns):
             multistep_hint = "提示：本任务包含多个步骤，先用 todo 记录/更新，再执行；收尾用 todo list 汇总。"
 
@@ -291,14 +354,15 @@ class CodeAgent:
         tool_summaries = []
         for packet in self.recent_tool_packets[-3:]:
             tool_summaries.append(packet.content)
-        
+
         context_text = self.context_builder.build_base(
             user_query=user_input,
             conversation_history=self.history,
-            system_instructions=self.system_prompt + ("\n" + multistep_hint if multistep_hint else ""),
+            system_instructions=self.system_prompt
+            + ("\n" + multistep_hint if multistep_hint else ""),
             tool_summaries=tool_summaries if tool_summaries else None,
         )
-        
+
         # 将拼接好的上下文作为"问题"输入给 ReAct
         response = self.react.run(context_text, max_tokens=8000)
 
@@ -332,8 +396,12 @@ class CodeAgent:
             pass
 
         # 更新历史记录 (保留最近 50 条)
-        self.history.append(Message(content=user_input, role="user", timestamp=datetime.now()))
-        self.history.append(Message(content=response, role="assistant", timestamp=datetime.now()))
+        self.history.append(
+            Message(content=user_input, role="user", timestamp=datetime.now())
+        )
+        self.history.append(
+            Message(content=response, role="assistant", timestamp=datetime.now())
+        )
         if len(self.history) > 50:
             self.history = self.history[-50:]
         self._persist_session()

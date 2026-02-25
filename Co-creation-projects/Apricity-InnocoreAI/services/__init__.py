@@ -8,4 +8,10 @@ from .analysis_service import AnalysisService
 from .writing_service import WritingService
 from .user_service import UserService
 
-__all__ = ['PaperService', 'TaskService', 'AnalysisService', 'WritingService', 'UserService']
+__all__ = [
+    "PaperService",
+    "TaskService",
+    "AnalysisService",
+    "WritingService",
+    "UserService",
+]

@@ -9,8 +9,7 @@ from utils.logger import setup_logger
 
 def print_welcome():
     """打印欢迎信息"""
-    print(
-        """
+    print("""
 ╔══════════════════════════════════════════════════════════╗
 ║                                                          ║
 ║           🤖 Welcome to LearningAgent!                   ║
@@ -20,14 +19,12 @@ def print_welcome():
 ╚══════════════════════════════════════════════════════════╝
 
 输入 /help 查看可用命令
-    """
-    )
+    """)
 
 
 def print_goodbye():
     """打印告别信息"""
-    print(
-        """
+    print("""
 ╔══════════════════════════════════════════════════════════╗
 ║                                                          ║
 ║                  👋 Goodbye!                             ║
@@ -35,8 +32,7 @@ def print_goodbye():
 ║              Keep Learning, Keep Growing!                ║
 ║                                                          ║
 ╚══════════════════════════════════════════════════════════╝
-    """
-    )
+    """)
 
 
 def start_repl():

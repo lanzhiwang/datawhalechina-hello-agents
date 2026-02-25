@@ -34,17 +34,13 @@ class ProblemRepository:
             return None
 
         description = self._extract_block(
-            text,
-            start="## Description",
-            end="\\*\\*Example"
+            text, start="## Description", end="\\*\\*Example"
         )
 
         examples = self._parse_examples(text)
 
         constraints = self._extract_block(
-            text,
-            start="\\*\\*Constraints:\\*\\*",
-            end="\\*\\*Follow-up"
+            text, start="\\*\\*Constraints:\\*\\*", end="\\*\\*Follow-up"
         )
 
         tags = self._extract(r"\*\*Tags:\*\*(.*)", text)
@@ -68,31 +64,25 @@ class ProblemRepository:
         examples = []
 
         pattern = re.compile(
-            r"\*\*Example\s*\d+:\*\*(.*?)(?=\*\*Example|\*\*Constraints|\Z)",
-            re.S
+            r"\*\*Example\s*\d+:\*\*(.*?)(?=\*\*Example|\*\*Constraints|\Z)", re.S
         )
 
         for block in pattern.findall(text):
             input_ = self._extract(
-                r"Input:\s*(.*?)(?=\s*Output:|\s*Explanation:|\Z)",
-                block
+                r"Input:\s*(.*?)(?=\s*Output:|\s*Explanation:|\Z)", block
             )
 
-            output = self._extract(
-                r"Output:\s*(.*?)(?=\s*Explanation:|\Z)",
-                block
-            )
+            output = self._extract(r"Output:\s*(.*?)(?=\s*Explanation:|\Z)", block)
 
-            explanation = self._extract(
-                r"Explanation:\s*(.*)",
-                block
-            )
+            explanation = self._extract(r"Explanation:\s*(.*)", block)
 
-            examples.append({
-                "input": input_.strip() if input_ else "",
-                "output": output.strip() if output else "",
-                "explanation": explanation.strip() if explanation else ""
-            })
+            examples.append(
+                {
+                    "input": input_.strip() if input_ else "",
+                    "output": output.strip() if output else "",
+                    "explanation": explanation.strip() if explanation else "",
+                }
+            )
 
         return examples
 
@@ -104,15 +94,11 @@ class ProblemRepository:
         results = self.problems
 
         if tags:
-            results = [
-                p for p in results
-                if any(tag in p["tags"] for tag in tags)
-            ]
+            results = [p for p in results if any(tag in p["tags"] for tag in tags)]
 
         if difficulty:
             results = [
-                p for p in results
-                if p["difficulty"].lower() == difficulty.lower()
+                p for p in results if p["difficulty"].lower() == difficulty.lower()
             ]
 
         return results

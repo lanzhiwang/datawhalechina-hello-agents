@@ -10,13 +10,16 @@
 或者作为MCP服务器被客户端调用：
     MCPClient(["python", "weather_mcp.py"])
 """
+
 from fastmcp import FastMCP
 from weather import Weather
+
 # 创建MCP服务器实例
 mcp = FastMCP("WeatherServer")
 
 
 # ==================== 数学工具 ====================
+
 
 @mcp.tool()
 def query_wearher(city_name: str):
@@ -32,13 +35,14 @@ def query_wearher(city_name: str):
     weather = Weather()
     # 查询天气详细信息（字典格式）
     weather_details = weather.get_weather_details(city_name)
-    
+
     # 如果查询成功，返回详细信息
     if "error" not in weather_details:
         return weather_details
     else:
         # 如果查询失败，返回格式化字符串
         return weather.get_weather(city_name)
+
 
 @mcp.tool()
 def get_weather_details(city_name: str):
@@ -53,6 +57,7 @@ def get_weather_details(city_name: str):
     """
     weather = Weather()
     return weather.get_weather_details(city_name)
+
 
 @mcp.resource("info://capabilities")
 def get_capabilities() -> str:
@@ -74,6 +79,7 @@ def get_capabilities() -> str:
 
 # ==================== 提示词模板 ====================
 
+
 @mcp.prompt()
 def weather_helper() -> str:
     """
@@ -86,7 +92,6 @@ def weather_helper() -> str:
 - query_weather(city_name): 获取指定城市的天气信息
 
 请根据用户的问题选择合适的工具进行任务执行。"""
-
 
 
 # ==================== 主程序 ====================

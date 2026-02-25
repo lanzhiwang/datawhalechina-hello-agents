@@ -4,7 +4,6 @@ from agents.react_agent import NewReActAgent
 from agents.agent_prompts import ANALYSIS_AGENT_PROMPT
 from tools.data_analysis import create_data_analysis_registry
 
-
 if __name__ == "__main__":
     llm = HelloAgentsLLM()
     registry = create_data_analysis_registry()
@@ -13,7 +12,7 @@ if __name__ == "__main__":
         llm=llm,
         custom_prompt=ANALYSIS_AGENT_PROMPT,
         tool_registry=registry,
-        max_steps=5
+        max_steps=5,
     )
 
     plan_result = ["分析不同年龄段用户的偏好"]
@@ -23,7 +22,7 @@ if __name__ == "__main__":
         print(f"执行任务: {task}")
         try:
             answer = analysis_agent.run(task)
-            task_result.append({ "task": task, "result": answer })
+            task_result.append({"task": task, "result": answer})
             print(f"任务结果: {answer}")
         except Exception as e:
             print(f"执行过程中出现错误: {e}")

@@ -15,7 +15,9 @@ from services.text_processing import strip_tool_calls
 class ReportingService:
     """Generates the final structured report."""
 
-    def __init__(self, report_agent: ToolAwareSimpleAgent, config: Configuration) -> None:
+    def __init__(
+        self, report_agent: ToolAwareSimpleAgent, config: Configuration
+    ) -> None:
         self._agent = report_agent
         self._config = config
 
@@ -42,9 +44,13 @@ class ReportingService:
                     f"- 任务 {task.id}《{task.title}》：note_id={task.note_id}"
                 )
 
-        notes_section = "\n".join(note_references) if note_references else "- 暂无可用任务笔记"
+        notes_section = (
+            "\n".join(note_references) if note_references else "- 暂无可用任务笔记"
+        )
 
-        read_template = json.dumps({"action": "read", "note_id": "<note_id>"}, ensure_ascii=False)
+        read_template = json.dumps(
+            {"action": "read", "note_id": "<note_id>"}, ensure_ascii=False
+        )
         create_conclusion_template = json.dumps(
             {
                 "action": "create",
@@ -74,4 +80,3 @@ class ReportingService:
         report_text = strip_tool_calls(report_text).strip()
 
         return report_text or "报告生成失败，请检查输入。"
-

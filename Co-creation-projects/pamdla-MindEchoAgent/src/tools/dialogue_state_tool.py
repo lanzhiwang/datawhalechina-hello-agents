@@ -3,11 +3,11 @@
 from hello_agents.tools import Tool as BaseTool
 from src.utils.state import DialogueState
 
+
 class DialogueStateTool(BaseTool):
     def __init__(self):
         super().__init__(
-            name="dialogue_state_tool",
-            description="判断当前对话应处于哪个阶段"
+            name="dialogue_state_tool", description="判断当前对话应处于哪个阶段"
         )
         self.name = "dialogue_state_tool"
         self.description = "判断当前对话应处于哪个阶段"
@@ -17,9 +17,9 @@ class DialogueStateTool(BaseTool):
             "type": "object",
             "properties": {
                 "query": {"type": "string", "description": "用户输入"},
-                "current_state": {"type": "string", "description": "当前状态"}
+                "current_state": {"type": "string", "description": "当前状态"},
             },
-            "required": ["query"]
+            "required": ["query"],
         }
 
     def run(self, query: str, current_state: str = "") -> str:

@@ -23,7 +23,9 @@ class VibeLearningAgent(SimpleAgent):
     - 生成会话总结
     """
 
-    def __init__(self, llm: HelloAgentsLLM, file_manager: FileManager, streaming: bool = None):
+    def __init__(
+        self, llm: HelloAgentsLLM, file_manager: FileManager, streaming: bool = None
+    ):
         """
         初始化 VibeLearningAgent
 
@@ -60,14 +62,13 @@ class VibeLearningAgent(SimpleAgent):
 
         # 添加流式输出支持
         from utils.streaming import should_stream
+
         self.streaming = should_stream(streaming)
 
         # 使用父类初始化
         super().__init__("VibeLearningAgent", llm, system_prompt)
 
-    def start_session(
-        self, domain: str, mode: str = "free"
-    ) -> str:
+    def start_session(self, domain: str, mode: str = "free") -> str:
         """
         开始互动学习会话（只生成第一个问题）
 
@@ -117,7 +118,7 @@ class VibeLearningAgent(SimpleAgent):
         temp_file = session_path / ".current_session.txt"
         temp_file.write_text(
             f"{mode}\n{datetime.now().strftime('%Y-%m-%d %H:%M')}\n{question}",
-            encoding='utf-8'
+            encoding="utf-8",
         )
 
     def continue_session(self, domain: str, user_answer: str, mode: str) -> str:
@@ -141,7 +142,7 @@ class VibeLearningAgent(SimpleAgent):
             temp_file = session_path / ".current_session.txt"
 
             if temp_file.exists():
-                lines = temp_file.read_text(encoding='utf-8').strip().split('\n')
+                lines = temp_file.read_text(encoding="utf-8").strip().split("\n")
                 last_question = lines[-1] if len(lines) > 0 else ""
             else:
                 last_question = "请描述你对这个主题的理解。"
@@ -150,12 +151,14 @@ class VibeLearningAgent(SimpleAgent):
             feedback = self._generate_feedback(last_question, user_answer, plan)
 
             # 生成下一个问题
-            next_question = self._generate_next_question(plan, [last_question, user_answer], mode)
+            next_question = self._generate_next_question(
+                plan, [last_question, user_answer], mode
+            )
 
             # 更新临时文件
             temp_file.write_text(
                 f"{mode}\n{datetime.now().strftime('%Y-%m-%d %H:%M')}\n{next_question}",
-                encoding='utf-8'
+                encoding="utf-8",
             )
 
             # 返回反馈和下一个问题
@@ -170,7 +173,9 @@ class VibeLearningAgent(SimpleAgent):
             # 发生错误时保存会话并返回
             return f"❌ 处理回答时发生错误：{e}\n\n会话已自动保存。"
 
-    def _save_conversation_history(self, domain: str, mode: str, conversation: List[str], error: str = None) -> None:
+    def _save_conversation_history(
+        self, domain: str, mode: str, conversation: List[str], error: str = None
+    ) -> None:
         """
         保存对话历史
 
@@ -239,15 +244,14 @@ class VibeLearningAgent(SimpleAgent):
             try:
                 if self.streaming:
                     from utils.streaming import stream_response
+
                     return stream_response(self.llm, messages)
                 else:
                     return self.llm.invoke(messages).strip()
             except Exception:
                 return "请简单描述一下你对这个主题的理解，以及你最想学习的部分是什么？"
 
-    def _generate_next_question(
-        self, plan: str, history: List[str], mode: str
-    ) -> str:
+    def _generate_next_question(self, plan: str, history: List[str], mode: str) -> str:
         """
         生成下一个问题（根据历史对话调整）
 
@@ -294,15 +298,14 @@ class VibeLearningAgent(SimpleAgent):
             try:
                 if self.streaming:
                     from utils.streaming import stream_response
+
                     return stream_response(self.llm, messages)
                 else:
                     return self.llm.invoke(messages).strip()
             except Exception:
                 return "请继续分享你的想法，或者有什么具体的问题想讨论吗？"
 
-    def _generate_feedback(
-        self, question: str, answer: str, plan: str
-    ) -> str:
+    def _generate_feedback(self, question: str, answer: str, plan: str) -> str:
         """
         生成反馈
 
@@ -337,15 +340,14 @@ class VibeLearningAgent(SimpleAgent):
         try:
             if self.streaming:
                 from utils.streaming import stream_response
+
                 return stream_response(self.llm, messages)
             else:
                 return self.llm.invoke(messages).strip()
         except Exception:
             return "好的，谢谢你的回答。让我们继续深入探讨这个话题。"
 
-    def _evaluate_answer(
-        self, question: str, answer: str, plan: str
-    ) -> Dict[str, any]:
+    def _evaluate_answer(self, question: str, answer: str, plan: str) -> Dict[str, any]:
         """
         评估回答质量
 

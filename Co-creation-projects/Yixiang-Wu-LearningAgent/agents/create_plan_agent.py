@@ -25,6 +25,7 @@ class CreatePlanAgent(ReActAgent):
 
         # 添加流式输出支持
         from utils.streaming import should_stream
+
         self.streaming = should_stream(streaming)
 
         # 系统提示词
@@ -252,6 +253,7 @@ class CreatePlanAgent(ReActAgent):
 
         if self.streaming:
             from utils.streaming import stream_response
+
             return stream_response(self.llm, messages)
         else:
             return self.llm.invoke(messages)

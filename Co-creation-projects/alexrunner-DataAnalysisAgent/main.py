@@ -4,10 +4,13 @@ import shutil
 from hello_agents import HelloAgentsLLM, SimpleAgent
 
 from agents.react_agent import NewReActAgent
-from agents.agent_prompts import PLAN_AGENT_PROMPT, ANALYSIS_AGENT_PROMPT, REPORT_AGENT_PROMPT
+from agents.agent_prompts import (
+    PLAN_AGENT_PROMPT,
+    ANALYSIS_AGENT_PROMPT,
+    REPORT_AGENT_PROMPT,
+)
 from tools.data_exploration import create_data_exploration_registry
 from tools.data_analysis import create_data_analysis_registry
-
 
 if __name__ == "__main__":
     # 清空 out 目录
@@ -23,7 +26,7 @@ if __name__ == "__main__":
         llm=llm,
         custom_prompt=PLAN_AGENT_PROMPT,
         tool_registry=registry,
-        max_steps=5
+        max_steps=5,
     )
 
     question = "请开始分析"
@@ -44,7 +47,7 @@ if __name__ == "__main__":
         llm=llm,
         custom_prompt=ANALYSIS_AGENT_PROMPT,
         tool_registry=registry,
-        max_steps=5
+        max_steps=5,
     )
 
     task_result = []
@@ -53,7 +56,7 @@ if __name__ == "__main__":
         print(f"执行任务: {task}")
         try:
             answer = analysis_agent.run(task)
-            task_result.append({ "task": task, "result": answer })
+            task_result.append({"task": task, "result": answer})
             print(f"任务结果: {answer}")
         except Exception as e:
             print(f"执行过程中出现错误: {e}")
@@ -64,7 +67,7 @@ if __name__ == "__main__":
         name="ReportAgent",
         system_prompt=REPORT_AGENT_PROMPT,
         llm=llm,
-        enable_tool_calling=False
+        enable_tool_calling=False,
     )
 
     final_result = report_agent.run(json.dumps(task_result, ensure_ascii=False))

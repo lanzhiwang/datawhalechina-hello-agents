@@ -12,10 +12,18 @@ from hello_agents.protocols import MCPServer
 weather_server = MCPServer(name="weather-server", description="真实天气查询服务")
 
 CITY_MAP = {
-    "北京": "Beijing", "上海": "Shanghai", "广州": "Guangzhou",
-    "深圳": "Shenzhen", "杭州": "Hangzhou", "成都": "Chengdu",
-    "重庆": "Chongqing", "武汉": "Wuhan", "西安": "Xi'an",
-    "南京": "Nanjing", "天津": "Tianjin", "苏州": "Suzhou"
+    "北京": "Beijing",
+    "上海": "Shanghai",
+    "广州": "Guangzhou",
+    "深圳": "Shenzhen",
+    "杭州": "Hangzhou",
+    "成都": "Chengdu",
+    "重庆": "Chongqing",
+    "武汉": "Wuhan",
+    "西安": "Xi'an",
+    "南京": "Nanjing",
+    "天津": "Tianjin",
+    "苏州": "Suzhou",
 }
 
 
@@ -36,7 +44,7 @@ def get_weather_data(city: str) -> Dict[str, Any]:
         "condition": current["weatherDesc"][0]["value"],
         "wind_speed": round(float(current["windspeedKmph"]) / 3.6, 1),
         "visibility": float(current["visibility"]),
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
 
 
@@ -61,7 +69,7 @@ def get_server_info() -> str:
     info = {
         "name": "Weather MCP Server",
         "version": "1.0.0",
-        "tools": ["get_weather", "list_supported_cities", "get_server_info"]
+        "tools": ["get_weather", "list_supported_cities", "get_server_info"],
     }
     return json.dumps(info, ensure_ascii=False, indent=2)
 
@@ -74,4 +82,3 @@ weather_server.add_tool(get_server_info)
 
 if __name__ == "__main__":
     weather_server.run()
-

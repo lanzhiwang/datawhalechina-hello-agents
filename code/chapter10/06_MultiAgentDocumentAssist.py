@@ -5,6 +5,7 @@
 - Agent1：GitHub搜索专家
 - Agent2：文档生成专家
 """
+
 from hello_agents import SimpleAgent, HelloAgentsLLM
 from hello_agents.tools import MCPTool
 from dotenv import load_dotenv
@@ -12,9 +13,9 @@ from dotenv import load_dotenv
 # 加载.env文件中的环境变量
 load_dotenv(dotenv_path="../HelloAgents/.env")
 
-print("="*70)
+print("=" * 70)
 print("多Agent协作的智能文档助手")
-print("="*70)
+print("=" * 70)
 
 # ============================================================
 # Agent 1: GitHub搜索专家
@@ -30,13 +31,12 @@ github_searcher = SimpleAgent(
 - 仓库名称
 - 简短描述
 
-保持简洁，不要添加额外的解释。"""
+保持简洁，不要添加额外的解释。""",
 )
 
 # 添加GitHub工具
 github_tool = MCPTool(
-    name="gh",
-    server_command=["npx", "-y", "@modelcontextprotocol/server-github"]
+    name="gh", server_command=["npx", "-y", "@modelcontextprotocol/server-github"]
 )
 github_searcher.add_tool(github_tool)
 
@@ -57,35 +57,35 @@ document_writer = SimpleAgent(
 - 主要内容（分点列出，包括项目名称、描述等）
 - 总结
 
-请直接输出完整的Markdown格式报告内容，不要使用工具保存。"""
+请直接输出完整的Markdown格式报告内容，不要使用工具保存。""",
 )
 
 # 添加文件系统工具
 fs_tool = MCPTool(
     name="fs",
-    server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."]
+    server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."],
 )
 document_writer.add_tool(fs_tool)
 
 # ============================================================
 # 执行任务
 # ============================================================
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("开始执行任务...")
-print("="*70)
+print("=" * 70)
 
 try:
     # 步骤1：GitHub搜索
     print("\n【步骤3】Agent1 搜索GitHub...")
     search_task = "搜索关于'AI agent'的GitHub仓库，返回前5个最相关的结果"
-    
+
     search_results = github_searcher.run(search_task)
-    
+
     print("\n搜索结果:")
     print("-" * 70)
     print(search_results)
     print("-" * 70)
-    
+
     # 步骤2：生成报告
     print("\n【步骤4】Agent2 生成报告...")
     report_task = f"""
@@ -112,6 +112,7 @@ try:
     # 步骤3：保存报告
     print("\n【步骤5】保存报告到文件...")
     import os
+
     try:
         with open("report.md", "w", encoding="utf-8") as f:
             f.write(report_content)
@@ -122,13 +123,13 @@ try:
         print(f"✅ 文件大小: {file_size} 字节")
     except Exception as e:
         print(f"❌ 保存失败: {e}")
-    
-    print("\n" + "="*70)
+
+    print("\n" + "=" * 70)
     print("任务完成！")
-    print("="*70)
-    
+    print("=" * 70)
+
 except Exception as e:
     print(f"\n❌ 错误: {e}")
     import traceback
-    traceback.print_exc()
 
+    traceback.print_exc()

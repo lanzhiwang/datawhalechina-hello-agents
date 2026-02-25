@@ -10,10 +10,12 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+
 class PaperDB(Base):
     """论文数据库模型"""
+
     __tablename__ = "papers"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(500), nullable=False, index=True)
     authors = Column(Text)  # JSON格式存储作者列表
@@ -35,8 +37,10 @@ class PaperDB(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+
 class Paper(BaseModel):
     """论文响应模型"""
+
     id: int
     title: str
     authors: List[str]
@@ -51,12 +55,14 @@ class Paper(BaseModel):
     relevance_score: float = 0.0
     is_processed: bool = False
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
+
 class PaperCreate(BaseModel):
     """论文创建模型"""
+
     title: str = Field(..., min_length=1, max_length=500)
     authors: List[str] = []
     abstract: Optional[str] = None
@@ -67,8 +73,10 @@ class PaperCreate(BaseModel):
     arxiv_id: Optional[str] = None
     pdf_url: Optional[str] = None
 
+
 class PaperUpdate(BaseModel):
     """论文更新模型"""
+
     title: Optional[str] = None
     authors: Optional[List[str]] = None
     abstract: Optional[str] = None
@@ -78,16 +86,20 @@ class PaperUpdate(BaseModel):
     quality_score: Optional[float] = None
     relevance_score: Optional[float] = None
 
+
 class PaperSearch(BaseModel):
     """论文搜索模型"""
+
     query: str = Field(..., min_length=1)
     filters: Dict[str, Any] = {}
     sort_by: str = "relevance"
     limit: int = Field(default=20, ge=1, le=100)
     offset: int = Field(default=0, ge=0)
 
+
 class PaperAnalysis(BaseModel):
     """论文分析结果"""
+
     paper_id: int
     summary: str
     key_findings: List[str]

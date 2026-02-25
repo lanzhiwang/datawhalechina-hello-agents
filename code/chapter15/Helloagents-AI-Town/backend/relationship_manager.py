@@ -4,44 +4,45 @@ import sys
 import os
 
 # 添加HelloAgents到Python路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'HelloAgents'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "HelloAgents"))
 
 from hello_agents import SimpleAgent, HelloAgentsLLM
 from typing import Dict, Optional, Tuple
 import json
 import re
 
+
 class RelationshipManager:
     """NPC好感度管理器
-    
+
     功能:
     - 管理NPC与玩家的好感度 (0-100)
     - 使用LLM分析对话情感
     - 自动更新好感度
     - 提供好感度等级和修饰词
     """
-    
+
     def __init__(self, llm: HelloAgentsLLM):
         """初始化好感度管理器
-        
+
         Args:
             llm: HelloAgentsLLM实例
         """
         self.llm = llm
-        
+
         # 存储每个NPC与玩家的好感度
         # 格式: {npc_name: {player_id: affinity_score}}
         self.affinity_scores: Dict[str, Dict[str, float]] = {}
-        
+
         # 创建好感度分析Agent
         self.analyzer_agent = SimpleAgent(
             name="AffinityAnalyzer",
             llm=llm,
-            system_prompt=self._create_analyzer_prompt()
+            system_prompt=self._create_analyzer_prompt(),
         )
-        
+
         print("💖 好感度管理系统已初始化")
-    
+
     def _create_analyzer_prompt(self) -> str:
         """创建情感分析Agent的系统提示词"""
         return """你是一个情感分析专家,负责分析对话中的情感倾向,判断是否应该改变NPC对玩家的好感度。
@@ -101,28 +102,28 @@ NPC: "当然可以!我很乐意分享。"
 - reason必须简短(10字以内)
 - sentiment必须是positive/neutral/negative之一
 """
-    
+
     def get_affinity(self, npc_name: str, player_id: str = "player") -> float:
         """获取好感度 (0-100)
-        
+
         Args:
             npc_name: NPC名称
             player_id: 玩家ID
-            
+
         Returns:
             好感度值 (0-100)
         """
         if npc_name not in self.affinity_scores:
             self.affinity_scores[npc_name] = {}
-        
+
         if player_id not in self.affinity_scores[npc_name]:
             self.affinity_scores[npc_name][player_id] = 50.0  # 初始好感度50
-        
+
         return self.affinity_scores[npc_name][player_id]
-    
+
     def set_affinity(self, npc_name: str, affinity: float, player_id: str = "player"):
         """设置好感度
-        
+
         Args:
             npc_name: NPC名称
             affinity: 好感度值 (0-100)
@@ -130,26 +131,26 @@ NPC: "当然可以!我很乐意分享。"
         """
         if npc_name not in self.affinity_scores:
             self.affinity_scores[npc_name] = {}
-        
+
         # 限制在0-100范围内
         affinity = max(0.0, min(100.0, affinity))
         self.affinity_scores[npc_name][player_id] = affinity
-    
+
     def analyze_and_update_affinity(
         self,
         npc_name: str,
         player_message: str,
         npc_response: str,
-        player_id: str = "player"
+        player_id: str = "player",
     ) -> Dict:
         """分析对话并更新好感度
-        
+
         Args:
             npc_name: NPC名称
             player_message: 玩家消息
             npc_response: NPC回复
             player_id: 玩家ID
-            
+
         Returns:
             分析结果字典
         """
@@ -161,14 +162,14 @@ NPC: "当然可以!我很乐意分享。"
 
 请判断是否应该改变好感度,并给出变化量。
 """
-        
+
         try:
             # 调用分析Agent
             response = self.analyzer_agent.run(prompt)
-            
+
             # 解析JSON响应
             analysis = self._parse_analysis(response)
-            
+
             if analysis["should_change"]:
                 # 更新好感度
                 current_affinity = self.get_affinity(npc_name, player_id)
@@ -191,33 +192,34 @@ NPC: "当然可以!我很乐意分享。"
                     "reason": analysis["reason"],
                     "sentiment": analysis.get("sentiment", "neutral"),
                     "old_level": old_level,
-                    "new_level": new_level
+                    "new_level": new_level,
                 }
             else:
                 return {
                     "changed": False,
                     "affinity": self.get_affinity(npc_name, player_id),
                     "reason": analysis["reason"],
-                    "sentiment": analysis.get("sentiment", "neutral")
+                    "sentiment": analysis.get("sentiment", "neutral"),
                 }
-        
+
         except Exception as e:
             print(f"❌ 好感度分析失败: {e}")
             import traceback
+
             traceback.print_exc()
             return {
                 "changed": False,
                 "affinity": self.get_affinity(npc_name, player_id),
                 "reason": "分析失败",
-                "sentiment": "neutral"
+                "sentiment": "neutral",
             }
-    
+
     def _parse_analysis(self, response: str) -> Dict:
         """解析分析结果
-        
+
         Args:
             response: LLM响应
-            
+
         Returns:
             解析后的字典
         """
@@ -228,9 +230,9 @@ NPC: "当然可以!我很乐意分享。"
         except json.JSONDecodeError:
             # 尝试提取JSON部分
             # 查找第一个 { 和最后一个 }
-            start = response.find('{')
-            end = response.rfind('}') + 1
-            
+            start = response.find("{")
+            end = response.rfind("}") + 1
+
             if start != -1 and end > start:
                 json_str = response[start:end]
                 try:
@@ -238,37 +240,41 @@ NPC: "当然可以!我很乐意分享。"
                     return analysis
                 except json.JSONDecodeError:
                     pass
-            
+
             # 尝试使用正则表达式提取
             # 匹配 "should_change": true/false
-            should_change_match = re.search(r'"should_change"\s*:\s*(true|false)', response, re.IGNORECASE)
+            should_change_match = re.search(
+                r'"should_change"\s*:\s*(true|false)', response, re.IGNORECASE
+            )
             change_amount_match = re.search(r'"change_amount"\s*:\s*(-?\d+)', response)
             reason_match = re.search(r'"reason"\s*:\s*"([^"]+)"', response)
             sentiment_match = re.search(r'"sentiment"\s*:\s*"([^"]+)"', response)
-            
+
             if should_change_match and change_amount_match:
                 return {
                     "should_change": should_change_match.group(1).lower() == "true",
                     "change_amount": int(change_amount_match.group(1)),
                     "reason": reason_match.group(1) if reason_match else "未知",
-                    "sentiment": sentiment_match.group(1) if sentiment_match else "neutral"
+                    "sentiment": (
+                        sentiment_match.group(1) if sentiment_match else "neutral"
+                    ),
                 }
-            
+
             # 解析失败,返回默认值
             print(f"⚠️  JSON解析失败,使用默认值。原始响应: {response[:100]}...")
             return {
                 "should_change": False,
                 "change_amount": 0,
                 "reason": "解析失败",
-                "sentiment": "neutral"
+                "sentiment": "neutral",
             }
-    
+
     def get_affinity_level(self, affinity: float) -> str:
         """获取好感度等级
-        
+
         Args:
             affinity: 好感度值 (0-100)
-            
+
         Returns:
             好感度等级名称
         """
@@ -282,13 +288,13 @@ NPC: "当然可以!我很乐意分享。"
             return "熟悉"
         else:
             return "陌生"
-    
+
     def get_affinity_modifier(self, affinity: float) -> str:
         """获取好感度修饰词 (用于调整对话风格)
-        
+
         Args:
             affinity: 好感度值 (0-100)
-            
+
         Returns:
             对话风格修饰词
         """
@@ -302,13 +308,13 @@ NPC: "当然可以!我很乐意分享。"
             return "礼貌但略显生疏,回答简洁"
         else:
             return "冷淡疏离,不太愿意多说,回答简短"
-    
+
     def get_all_affinities(self, player_id: str = "player") -> Dict[str, Dict]:
         """获取所有NPC的好感度信息
-        
+
         Args:
             player_id: 玩家ID
-            
+
         Returns:
             所有NPC的好感度信息
         """
@@ -318,7 +324,6 @@ NPC: "当然可以!我很乐意分享。"
             result[npc_name] = {
                 "affinity": affinity,
                 "level": self.get_affinity_level(affinity),
-                "modifier": self.get_affinity_modifier(affinity)
+                "modifier": self.get_affinity_modifier(affinity),
             }
         return result
-

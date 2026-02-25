@@ -9,8 +9,8 @@ from .exceptions import *
 
 __all__ = [
     "InnoCoreConfig",
-    "get_config", 
+    "get_config",
     "update_config",
     "DatabaseManager",
-    "VectorStoreManager"
+    "VectorStoreManager",
 ]

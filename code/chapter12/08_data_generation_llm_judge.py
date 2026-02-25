@@ -28,14 +28,14 @@ generated_problems = [
         "problem_id": "generated_001",
         "problem": "Find the number of positive integers $n$ such that $n^2 + 19n + 92$ is a perfect square.",
         "answer": "4",
-        "solution": "Let $n^2 + 19n + 92 = m^2$ for some positive integer $m$..."
+        "solution": "Let $n^2 + 19n + 92 = m^2$ for some positive integer $m$...",
     },
     {
         "problem_id": "generated_002",
         "problem": "In triangle $ABC$, $AB = 13$, $BC = 14$, and $CA = 15$. Find the area of the triangle.",
         "answer": "84",
-        "solution": "Using Heron's formula, $s = (13+14+15)/2 = 21$..."
-    }
+        "solution": "Using Heron's formula, $s = (13+14+15)/2 = 21$...",
+    },
 ]
 
 # 2. 创建LLM Judge评估器
@@ -43,19 +43,19 @@ llm = HelloAgentsLLM(model_name="gpt-4o")
 judge = LLMJudge(llm=llm)
 
 # 3. 评估每道题目
-print("="*60)
+print("=" * 60)
 print("LLM Judge评估")
-print("="*60)
+print("=" * 60)
 
 all_scores = []
 
 for i, problem in enumerate(generated_problems, 1):
     print(f"\n评估题目 {i}/{len(generated_problems)}")
     print(f"题目ID: {problem['problem_id']}")
-    
+
     # 评估单道题目
     result = judge.evaluate_single(problem)
-    
+
     # 显示评估结果
     print(f"\n评估结果:")
     print(f"  正确性: {result['correctness']}/5")
@@ -65,19 +65,19 @@ for i, problem in enumerate(generated_problems, 1):
     print(f"  平均分: {result['average_score']:.2f}/5")
     print(f"\n评语:")
     print(f"  {result['feedback']}")
-    
+
     all_scores.append(result)
 
 # 4. 计算总体统计
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("总体统计")
-print("="*60)
+print("=" * 60)
 
-avg_correctness = sum(s['correctness'] for s in all_scores) / len(all_scores)
-avg_clarity = sum(s['clarity'] for s in all_scores) / len(all_scores)
-avg_difficulty = sum(s['difficulty_match'] for s in all_scores) / len(all_scores)
-avg_completeness = sum(s['completeness'] for s in all_scores) / len(all_scores)
-avg_overall = sum(s['average_score'] for s in all_scores) / len(all_scores)
+avg_correctness = sum(s["correctness"] for s in all_scores) / len(all_scores)
+avg_clarity = sum(s["clarity"] for s in all_scores) / len(all_scores)
+avg_difficulty = sum(s["difficulty_match"] for s in all_scores) / len(all_scores)
+avg_completeness = sum(s["completeness"] for s in all_scores) / len(all_scores)
+avg_overall = sum(s["average_score"] for s in all_scores) / len(all_scores)
 
 print(f"\n平均分:")
 print(f"  正确性: {avg_correctness:.2f}/5")
@@ -101,18 +101,23 @@ else:
 output_file = "./evaluation_results/llm_judge_results.json"
 os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
-with open(output_file, 'w', encoding='utf-8') as f:
-    json.dump({
-        'problems': generated_problems,
-        'scores': all_scores,
-        'statistics': {
-            'avg_correctness': avg_correctness,
-            'avg_clarity': avg_clarity,
-            'avg_difficulty': avg_difficulty,
-            'avg_completeness': avg_completeness,
-            'avg_overall': avg_overall
-        }
-    }, f, indent=2, ensure_ascii=False)
+with open(output_file, "w", encoding="utf-8") as f:
+    json.dump(
+        {
+            "problems": generated_problems,
+            "scores": all_scores,
+            "statistics": {
+                "avg_correctness": avg_correctness,
+                "avg_clarity": avg_clarity,
+                "avg_difficulty": avg_difficulty,
+                "avg_completeness": avg_completeness,
+                "avg_overall": avg_overall,
+            },
+        },
+        f,
+        indent=2,
+        ensure_ascii=False,
+    )
 
 print(f"\n✅ 评估结果已保存到 {output_file}")
 
@@ -120,48 +125,47 @@ print(f"\n✅ 评估结果已保存到 {output_file}")
 # ============================================================
 # LLM Judge评估
 # ============================================================
-# 
+#
 # 评估题目 1/2
 # 题目ID: generated_001
-# 
+#
 # 评估结果:
 #   正确性: 5/5
 #   清晰度: 4/5
 #   难度匹配: 5/5
 #   完整性: 5/5
 #   平均分: 4.75/5
-# 
+#
 # 评语:
 #   This is an excellent AIME-level problem. The problem is well-posed,
 #   the solution is correct, and the difficulty is appropriate.
-# 
+#
 # 评估题目 2/2
 # 题目ID: generated_002
-# 
+#
 # 评估结果:
 #   正确性: 5/5
 #   清晰度: 5/5
 #   难度匹配: 3/5
 #   完整性: 5/5
 #   平均分: 4.50/5
-# 
+#
 # 评语:
 #   The problem is correct and clear, but the difficulty is slightly
 #   below AIME level. Consider adding more complexity.
-# 
+#
 # ============================================================
 # 总体统计
 # ============================================================
-# 
+#
 # 平均分:
 #   正确性: 5.00/5
 #   清晰度: 4.50/5
 #   难度匹配: 4.00/5
 #   完整性: 5.00/5
 #   总体平均: 4.62/5
-# 
+#
 # 质量评估:
 # ✅ 优秀 - 题目质量很高，可以直接使用
-# 
+#
 # ✅ 评估结果已保存到 ./evaluation_results/llm_judge_results.json
-

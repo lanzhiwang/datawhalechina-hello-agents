@@ -10,13 +10,17 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+
 class WritingDB(Base):
     """写作数据库模型"""
+
     __tablename__ = "writing"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
-    writing_type = Column(String(50), nullable=False)  # review, summary, critique, proposal
+    writing_type = Column(
+        String(50), nullable=False
+    )  # review, summary, critique, proposal
     content = Column(Text)
     outline = Column(JSON)  # 大纲结构
     sections = Column(JSON)  # 章节内容
@@ -31,8 +35,10 @@ class WritingDB(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+
 class Writing(BaseModel):
     """写作响应模型"""
+
     id: int
     title: str
     writing_type: str
@@ -44,19 +50,23 @@ class Writing(BaseModel):
     word_count: int = 0
     status: str = "draft"
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
+
 class WritingCreate(BaseModel):
     """写作创建模型"""
+
     title: str = Field(..., min_length=1, max_length=200)
-    writing_type: str = Field(..., regex=r'^(review|summary|critique|proposal)$')
+    writing_type: str = Field(..., regex=r"^(review|summary|critique|proposal)$")
     paper_ids: List[int] = []
     outline: Optional[List[Dict[str, Any]]] = None
 
+
 class WritingUpdate(BaseModel):
     """写作更新模型"""
+
     title: Optional[str] = None
     content: Optional[str] = None
     outline: Optional[List[Dict[str, Any]]] = None
@@ -65,8 +75,10 @@ class WritingUpdate(BaseModel):
     status: Optional[str] = None
     quality_score: Optional[float] = Field(None, ge=0.0, le=1.0)
 
+
 class LiteratureReview(BaseModel):
     """文献综述"""
+
     introduction: str
     methodology_review: str
     findings_synthesis: str
@@ -74,24 +86,30 @@ class LiteratureReview(BaseModel):
     conclusion: str
     references: List[Dict[str, Any]]
 
+
 class PaperSummary(BaseModel):
     """论文总结"""
+
     background: str
     methods: str
     results: str
     conclusions: str
     significance: str
 
+
 class PaperCritique(BaseModel):
     """论文评述"""
+
     strengths: List[str]
     weaknesses: List[str]
     methodological_issues: List[str]
     interpretation_concerns: List[str]
     suggestions: List[str]
 
+
 class ResearchProposal(BaseModel):
     """研究提案"""
+
     background: str
     problem_statement: str
     research_questions: List[str]
@@ -100,12 +118,15 @@ class ResearchProposal(BaseModel):
     significance: str
     timeline: str
 
+
 class WritingSection(BaseModel):
     """写作章节"""
+
     title: str
     content: str
-    subsections: List['WritingSection'] = []
+    subsections: List["WritingSection"] = []
     citations: List[str] = []
+
 
 # 解决前向引用
 WritingSection.model_rebuild()

@@ -6,7 +6,6 @@ def get_current_date():
     return datetime.now().strftime("%B %d, %Y")
 
 
-
 todo_planner_system_prompt = """
 你是一名研究规划专家，请把复杂主题拆解为一组有限、互补的待办任务。
 - 任务之间应互补，避免重复；

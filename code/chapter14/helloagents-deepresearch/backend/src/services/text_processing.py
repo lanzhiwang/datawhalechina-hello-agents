@@ -13,4 +13,3 @@ def strip_tool_calls(text: str) -> str:
 
     pattern = re.compile(r"\[TOOL_CALL:[^\]]+\]")
     return pattern.sub("", text)
-

@@ -39,6 +39,7 @@ History: {history}
 # 加载环境变量
 load_dotenv()
 
+
 class NewReActAgent(ReActAgent):
     """
     重写的ReAct Agent - 推理与行动结合的智能体
@@ -52,7 +53,7 @@ class NewReActAgent(ReActAgent):
         system_prompt: Optional[str] = None,
         config: Optional[Config] = None,
         max_steps: int = 5,
-        custom_prompt: Optional[str] = None
+        custom_prompt: Optional[str] = None,
     ):
         super().__init__(name, llm, system_prompt, config)
         self.tool_registry = tool_registry
@@ -76,9 +77,7 @@ class NewReActAgent(ReActAgent):
             tools_desc = self.tool_registry.get_tools_description()
             history_str = "\n".join(self.current_history)
             prompt = self.prompt_template.format(
-                tools=tools_desc,
-                question=input_text,
-                history=history_str
+                tools=tools_desc, question=input_text, history=history_str
             )
 
             # 2. 调用LLM
@@ -105,11 +104,11 @@ class NewReActAgent(ReActAgent):
         print(f"\n⚠️ 达到最大步数 {self.max_steps}，开始生成最终答案")
         history_str = "\n".join(self.current_history)
         final_prompt = self.prompt_template.format(
-                tools="",
-                question=input_text,
-                history=history_str +
-                "\n\n请基于以上信息一次性给出最终答案（必须填入 Finish 字段）"
-            )
+            tools="",
+            question=input_text,
+            history=history_str
+            + "\n\n请基于以上信息一次性给出最终答案（必须填入 Finish 字段）",
+        )
         messages = [{"role": "user", "content": final_prompt}]
         final_response = self.llm.invoke(messages, **kwargs)
         thought, action, finish = self._parse_output(final_response)
@@ -137,11 +136,11 @@ class NewReActAgent(ReActAgent):
 
     def _extract_json_from_response(self, text: str) -> str:
         """从模型响应中提取JSON部分"""
-        start = text.find('{')
-        end = text.rfind('}')
+        start = text.find("{")
+        end = text.rfind("}")
 
         if start != -1 and end != -1 and start < end:
-            candidate = text[start:end+1]
+            candidate = text[start : end + 1]
             # 验证这是否是有效的JSON
             try:
                 json.loads(candidate)
@@ -162,10 +161,7 @@ if __name__ == "__main__":
     llm = HelloAgentsLLM()
     tool_registry = ToolRegistry()
     agent = NewReActAgent(
-        name="Agent",
-        llm=llm,
-        tool_registry=tool_registry,
-        max_steps=5
+        name="Agent", llm=llm, tool_registry=tool_registry, max_steps=5
     )
     question = "请简单介绍你自己"
     try:

@@ -19,42 +19,44 @@ from .routes import papers, users, tasks, analysis, writing, citations, workflow
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
     # 启动时初始化
     logger.info("正在启动InnoCore AI...")
-    
+
     # 初始化数据库（可选）
     try:
         await db_manager.initialize()
         logger.info("数据库初始化完成")
     except Exception as e:
         logger.warning(f"数据库初始化失败（将以无数据库模式运行）: {str(e)}")
-    
+
     # 初始化向量存储（可选）
     try:
         await vector_store_manager.initialize()
         logger.info("向量存储初始化完成")
     except Exception as e:
         logger.warning(f"向量存储初始化失败（将以无向量存储模式运行）: {str(e)}")
-    
+
     # 初始化智能体控制器（可选）
     try:
         await agent_controller.initialize()
         logger.info("智能体控制器初始化完成")
-        
+
         # 启动任务处理器
         import asyncio
+
         asyncio.create_task(agent_controller.start_task_processor())
         logger.info("任务处理器已启动")
     except Exception as e:
         logger.warning(f"智能体控制器初始化失败: {str(e)}")
-    
+
     logger.info("InnoCore AI 启动完成")
-    
+
     yield
-    
+
     # 关闭时清理
     logger.info("正在关闭InnoCore AI...")
     await agent_controller.shutdown()
@@ -62,12 +64,13 @@ async def lifespan(app: FastAPI):
     await vector_store_manager.close()
     logger.info("InnoCore AI已关闭")
 
+
 # 创建FastAPI应用
 app = FastAPI(
     title="InnoCore AI API",
     description="智能科研创新助手API",
     version="0.1.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # 配置CORS
@@ -100,7 +103,12 @@ FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
 # 挂载静态资源
 if os.path.exists(os.path.join(FRONTEND_DIR, "static")):
-    app.mount("/static", StaticFiles(directory=os.path.join(FRONTEND_DIR, "static")), name="static")
+    app.mount(
+        "/static",
+        StaticFiles(directory=os.path.join(FRONTEND_DIR, "static")),
+        name="static",
+    )
+
 
 # 根路径 - 返回前端页面
 @app.get("/")
@@ -112,8 +120,9 @@ async def root():
     return {
         "message": "Welcome to InnoCore AI API",
         "version": "0.1.0",
-        "status": "running"
+        "status": "running",
     }
+
 
 # 健康检查
 @app.get("/health")
@@ -122,24 +131,21 @@ async def health_check():
     try:
         # 检查各组件状态
         agent_status = await agent_controller.get_agent_status()
-        
+
         return {
             "status": "healthy",
             "timestamp": "2024-01-01T00:00:00Z",
             "components": {
                 "database": "connected",
                 "vector_store": "connected",
-                "agents": agent_status
-            }
+                "agents": agent_status,
+            },
         }
     except Exception as e:
         return JSONResponse(
-            status_code=503,
-            content={
-                "status": "unhealthy",
-                "error": str(e)
-            }
+            status_code=503, content={"status": "unhealthy", "error": str(e)}
         )
+
 
 # 全局异常处理
 @app.exception_handler(Exception)
@@ -150,9 +156,10 @@ async def global_exception_handler(request, exc):
         status_code=500,
         content={
             "error": "Internal server error",
-            "message": str(exc) if config.debug else "Something went wrong"
-        }
+            "message": str(exc) if config.debug else "Something went wrong",
+        },
     )
+
 
 if __name__ == "__main__":
     uvicorn.run(
@@ -160,5 +167,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         reload=config.debug,
-        log_level="info"
+        log_level="info",
     )

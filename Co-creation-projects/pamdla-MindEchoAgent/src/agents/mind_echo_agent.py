@@ -8,6 +8,7 @@ from src.tools.text_comfort_tool import TextComfortTool
 from src.tools.mood_summary_tool import MoodSummaryTool
 from src.utils.state import DialogueState
 
+
 def create_mind_echo_agent(user_id: str = "user001"):
     llm = HelloAgentsLLM()
 
@@ -19,11 +20,7 @@ def create_mind_echo_agent(user_id: str = "user001"):
 3）若用户出现“持续焦虑、睡不着、失眠”等关键词或状态为 ESCALATE，必须升级到 SleepAgent（A2A）
 """
 
-    agent = SimpleAgent(
-        name="MindEchoAgent",
-        llm=llm,
-        system_prompt=system_prompt
-    )
+    agent = SimpleAgent(name="MindEchoAgent", llm=llm, system_prompt=system_prompt)
 
     registry = ToolRegistry()
     registry.register_tool(MemoryTool(user_id=user_id))
@@ -36,7 +33,7 @@ def create_mind_echo_agent(user_id: str = "user001"):
     sleep_tool = A2ATool(
         agent_url="http://localhost:6000",  # SleepAgent 默认端口
         name="sleep_agent",
-        description="睡眠专家，处理失眠/焦虑等问题"
+        description="睡眠专家，处理失眠/焦虑等问题",
     )
     registry.register_tool(sleep_tool)
 

@@ -63,9 +63,11 @@ class DeepResearchAgent:
             system_prompt=report_writer_instructions.strip(),
         )
 
-        self._summarizer_factory: Callable[[], ToolAwareSimpleAgent] = lambda: self._create_tool_aware_agent(  # noqa: E501
-            name="任务总结专家",
-            system_prompt=task_summarizer_instructions.strip(),
+        self._summarizer_factory: Callable[[], ToolAwareSimpleAgent] = (
+            lambda: self._create_tool_aware_agent(  # noqa: E501
+                name="任务总结专家",
+                system_prompt=task_summarizer_instructions.strip(),
+            )
         )
 
         self.planner = PlanningService(self.todo_agent, self.config)
@@ -106,7 +108,9 @@ class DeepResearchAgent:
 
         return HelloAgentsLLM(**llm_kwargs)
 
-    def _create_tool_aware_agent(self, *, name: str, system_prompt: str) -> ToolAwareSimpleAgent:
+    def _create_tool_aware_agent(
+        self, *, name: str, system_prompt: str
+    ) -> ToolAwareSimpleAgent:
         """Instantiate a ToolAwareSimpleAgent sharing tool registry and tracker."""
         return ToolAwareSimpleAgent(
             name=name,
@@ -117,7 +121,9 @@ class DeepResearchAgent:
             tool_call_listener=self._tool_tracker.record,
         )
 
-    def _set_tool_event_sink(self, sink: Callable[[dict[str, Any]], None] | None) -> None:
+    def _set_tool_event_sink(
+        self, sink: Callable[[dict[str, Any]], None] | None
+    ) -> None:
         """Enable or disable immediate tool event callbacks."""
         self._tool_event_sink_enabled = sink is not None
         self._tool_tracker.set_event_sink(sink)
@@ -185,7 +191,9 @@ class DeepResearchAgent:
                 target_task_id = task.id
                 payload["task_id"] = task.id
 
-            channel = channel_map.get(target_task_id) if target_task_id is not None else None
+            channel = (
+                channel_map.get(target_task_id) if target_task_id is not None else None
+            )
             if channel:
                 payload.setdefault("step", channel["step"])
                 payload["stream_token"] = channel["token"]
@@ -215,7 +223,9 @@ class DeepResearchAgent:
                     task=task,
                 )
 
-                for event in self._execute_task(state, task, emit_stream=True, step=step):
+                for event in self._execute_task(
+                    state, task, emit_stream=True, step=step
+                ):
                     enqueue(event, task=task)
             except Exception as exc:  # pragma: no cover - defensive guardrail
                 logger.exception("Task execution failed", exc_info=exc)
@@ -372,7 +382,9 @@ class DeepResearchAgent:
                 "note_path": task.note_path,
             }
 
-            summary_stream, summary_getter = self.summarizer.stream_task_summary(state, task, context)
+            summary_stream, summary_getter = self.summarizer.stream_task_summary(
+                state, task, context
+            )
             try:
                 for event in self._drain_tool_events(state, step=step):
                     yield event
@@ -444,7 +456,9 @@ class DeepResearchAgent:
             "stream_token": task.stream_token,
         }
 
-    def _persist_final_report(self, state: SummaryState, report: str) -> dict[str, Any] | None:
+    def _persist_final_report(
+        self, state: SummaryState, report: str
+    ) -> dict[str, Any] | None:
         if not self.note_tool or not report or not report.strip():
             return None
 
@@ -545,7 +559,9 @@ class DeepResearchAgent:
         return match.group(1).strip()
 
 
-def run_deep_research(topic: str, config: Configuration | None = None) -> SummaryStateOutput:
+def run_deep_research(
+    topic: str, config: Configuration | None = None
+) -> SummaryStateOutput:
     """Convenience function mirroring the class-based API."""
     agent = DeepResearchAgent(config=config)
     return agent.run(topic)

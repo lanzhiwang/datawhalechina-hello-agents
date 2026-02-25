@@ -4,7 +4,7 @@ import sys
 import os
 
 # 添加HelloAgents到Python路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'HelloAgents'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "HelloAgents"))
 
 from hello_agents import SimpleAgent, HelloAgentsLLM
 from hello_agents.memory import MemoryManager, MemoryConfig, MemoryItem
@@ -12,9 +12,16 @@ from typing import Dict, List, Optional
 from datetime import datetime
 from relationship_manager import RelationshipManager
 from logger import (
-    log_dialogue_start, log_affinity, log_memory_retrieval,
-    log_generating_response, log_npc_response, log_analyzing_affinity,
-    log_affinity_change, log_memory_saved, log_dialogue_end, log_info
+    log_dialogue_start,
+    log_affinity,
+    log_memory_retrieval,
+    log_generating_response,
+    log_npc_response,
+    log_analyzing_affinity,
+    log_affinity_change,
+    log_memory_saved,
+    log_dialogue_end,
+    log_info,
 )
 
 # NPC角色配置
@@ -26,7 +33,7 @@ NPC_ROLES = {
         "personality": "技术宅,喜欢讨论算法和框架",
         "expertise": "多智能体系统、HelloAgents框架、Python开发、代码优化",
         "style": "简洁专业,喜欢用技术术语,偶尔吐槽bug",
-        "hobbies": "看技术博客、刷LeetCode、研究新框架"
+        "hobbies": "看技术博客、刷LeetCode、研究新框架",
     },
     "李四": {
         "title": "产品经理",
@@ -35,7 +42,7 @@ NPC_ROLES = {
         "personality": "外向健谈,善于沟通协调",
         "expertise": "需求分析、产品规划、用户体验、项目管理",
         "style": "友好热情,善于引导对话,喜欢用比喻",
-        "hobbies": "看产品分析、研究竞品、思考用户需求"
+        "hobbies": "看产品分析、研究竞品、思考用户需求",
     },
     "王五": {
         "title": "UI设计师",
@@ -44,9 +51,10 @@ NPC_ROLES = {
         "personality": "细腻敏感,注重美感",
         "expertise": "界面设计、交互设计、视觉呈现、用户体验",
         "style": "优雅简洁,喜欢用艺术化的表达,追求完美",
-        "hobbies": "看设计作品、逛Dribbble、品咖啡"
-    }
+        "hobbies": "看设计作品、逛Dribbble、品咖啡",
+    },
 }
+
 
 def create_system_prompt(name: str, role: Dict[str, str]) -> str:
     """创建NPC的系统提示词"""
@@ -83,6 +91,7 @@ def create_system_prompt(name: str, role: Dict[str, str]) -> str:
 - 回复要有人情味,不要太机械
 """
 
+
 class NPCAgentManager:
     """NPC Agent管理器 - 支持记忆功能"""
 
@@ -100,14 +109,16 @@ class NPCAgentManager:
 
         self.agents: Dict[str, SimpleAgent] = {}
         self.memories: Dict[str, MemoryManager] = {}  # ⭐ NPC记忆管理器
-        self.relationship_manager: Optional[RelationshipManager] = None  # ⭐ 好感度管理器
+        self.relationship_manager: Optional[RelationshipManager] = (
+            None  # ⭐ 好感度管理器
+        )
 
         # 初始化好感度管理器
         if self.llm:
             self.relationship_manager = RelationshipManager(self.llm)
 
         self._create_agents()
-    
+
     def _create_agents(self):
         """创建所有NPC Agent和记忆系统"""
         for name, role in NPC_ROLES.items():
@@ -118,7 +129,7 @@ class NPCAgentManager:
                     agent = SimpleAgent(
                         name=f"{name}-{role['title']}",
                         llm=self.llm,
-                        system_prompt=system_prompt
+                        system_prompt=system_prompt,
                     )
                 else:
                     # 模拟模式
@@ -140,7 +151,7 @@ class NPCAgentManager:
     def _create_memory_manager(self, npc_name: str) -> MemoryManager:
         """为NPC创建记忆管理器"""
         # 创建记忆存储目录
-        memory_dir = os.path.join(os.path.dirname(__file__), 'memory_data', npc_name)
+        memory_dir = os.path.join(os.path.dirname(__file__), "memory_data", npc_name)
         os.makedirs(memory_dir, exist_ok=True)
 
         # 配置记忆系统
@@ -150,7 +161,7 @@ class NPCAgentManager:
             working_memory_tokens=2000,  # 最多2000个token
             episodic_memory_capacity=100,  # 最多100条长期记忆
             enable_forgetting=True,  # 启用遗忘机制
-            forgetting_threshold=0.3  # 重要性低于0.3的记忆会被遗忘
+            forgetting_threshold=0.3,  # 重要性低于0.3的记忆会被遗忘
         )
 
         # 创建记忆管理器
@@ -160,13 +171,13 @@ class NPCAgentManager:
             enable_working=True,  # 启用工作记忆 (短期)
             enable_episodic=True,  # 启用情景记忆 (长期)
             enable_semantic=False,  # 不需要语义记忆
-            enable_perceptual=False  # 不需要感知记忆
+            enable_perceptual=False,  # 不需要感知记忆
         )
 
         print(f"  💾 {npc_name}的记忆系统已初始化 (存储路径: {memory_dir})")
 
         return memory_manager
-    
+
     def chat(self, npc_name: str, message: str, player_id: str = "player") -> str:
         """与指定NPC对话 (支持记忆功能和好感度系统)"""
         if npc_name not in self.agents:
@@ -189,7 +200,9 @@ class NPCAgentManager:
             if self.relationship_manager:
                 affinity = self.relationship_manager.get_affinity(npc_name, player_id)
                 affinity_level = self.relationship_manager.get_affinity_level(affinity)
-                affinity_modifier = self.relationship_manager.get_affinity_modifier(affinity)
+                affinity_modifier = self.relationship_manager.get_affinity_modifier(
+                    affinity
+                )
 
                 affinity_context = f"""【当前关系】
 你与玩家的关系: {affinity_level} (好感度: {affinity:.0f}/100)
@@ -205,9 +218,11 @@ class NPCAgentManager:
                     query=message,
                     memory_types=["working", "episodic"],
                     limit=5,
-                    min_importance=0.3  # 只检索重要性>=0.3的记忆
+                    min_importance=0.3,  # 只检索重要性>=0.3的记忆
                 )
-                log_memory_retrieval(npc_name, len(relevant_memories), relevant_memories)
+                log_memory_retrieval(
+                    npc_name, len(relevant_memories), relevant_memories
+                )
 
             # ⭐ 3. 构建增强的提示词 (包含好感度和记忆上下文)
             memory_context = self._build_memory_context(relevant_memories)
@@ -229,7 +244,7 @@ class NPCAgentManager:
                     npc_name=npc_name,
                     player_message=message,
                     npc_response=response,
-                    player_id=player_id
+                    player_id=player_id,
                 )
 
                 # 记录好感度变化详情 ⭐ 使用日志系统
@@ -245,7 +260,7 @@ class NPCAgentManager:
                     player_message=message,
                     npc_response=response,
                     player_id=player_id,
-                    affinity_info=affinity_result
+                    affinity_info=affinity_result,
                 )
                 log_memory_saved(npc_name)
 
@@ -257,9 +272,10 @@ class NPCAgentManager:
         except Exception as e:
             print(f"❌ {npc_name}对话失败: {e}")
             import traceback
+
             traceback.print_exc()
             return f"抱歉,我现在有点忙,等会儿再聊吧。(错误: {str(e)})"
-    
+
     def _build_memory_context(self, memories: List[MemoryItem]) -> str:
         """构建记忆上下文"""
         if not memories:
@@ -282,15 +298,21 @@ class NPCAgentManager:
         player_message: str,
         npc_response: str,
         player_id: str,
-        affinity_info: Optional[Dict] = None
+        affinity_info: Optional[Dict] = None,
     ):
         """保存对话到记忆系统 (包含好感度信息)"""
         current_time = datetime.now()
 
         # 获取好感度信息
-        affinity = affinity_info.get("new_affinity", affinity_info.get("affinity", 50.0)) if affinity_info else 50.0
+        affinity = (
+            affinity_info.get("new_affinity", affinity_info.get("affinity", 50.0))
+            if affinity_info
+            else 50.0
+        )
         affinity_change = affinity_info.get("change_amount", 0) if affinity_info else 0
-        sentiment = affinity_info.get("sentiment", "neutral") if affinity_info else "neutral"
+        sentiment = (
+            affinity_info.get("sentiment", "neutral") if affinity_info else "neutral"
+        )
 
         # 保存玩家消息
         memory_manager.add_memory(
@@ -305,11 +327,8 @@ class NPCAgentManager:
                 "affinity": affinity,  # ⭐ 记录当时的好感度
                 "affinity_change": affinity_change,  # ⭐ 记录好感度变化
                 "sentiment": sentiment,  # ⭐ 记录情感倾向
-                "context": {
-                    "interaction_type": "dialogue",
-                    "npc_name": npc_name
-                }
-            }
+                "context": {"interaction_type": "dialogue", "npc_name": npc_name},
+            },
         )
 
         # 保存NPC回复
@@ -324,11 +343,8 @@ class NPCAgentManager:
                 "timestamp": current_time.isoformat(),
                 "affinity": affinity,  # ⭐ 记录当时的好感度
                 "sentiment": sentiment,  # ⭐ 记录情感倾向
-                "context": {
-                    "interaction_type": "dialogue",
-                    "npc_name": npc_name
-                }
-            }
+                "context": {"interaction_type": "dialogue", "npc_name": npc_name},
+            },
         )
 
         print(f"  💾 对话已保存到{npc_name}的记忆中")
@@ -344,14 +360,16 @@ class NPCAgentManager:
             "title": role["title"],
             "location": role["location"],
             "activity": role["activity"],
-            "available": self.agents.get(npc_name) is not None
+            "available": self.agents.get(npc_name) is not None,
         }
-    
+
     def get_all_npcs(self) -> list:
         """获取所有NPC信息"""
         return [self.get_npc_info(name) for name in NPC_ROLES.keys()]
 
-    def get_npc_memories(self, npc_name: str, player_id: str = "player", limit: int = 10) -> List[Dict]:
+    def get_npc_memories(
+        self, npc_name: str, player_id: str = "player", limit: int = 10
+    ) -> List[Dict]:
         """获取NPC的记忆列表 (用于调试和展示)"""
         if npc_name not in self.memories:
             return []
@@ -365,20 +383,22 @@ class NPCAgentManager:
             memories = memory_manager.retrieve_memories(
                 query="",  # 空查询返回所有记忆
                 memory_types=["working", "episodic"],
-                limit=limit
+                limit=limit,
             )
 
             # 转换为字典格式
             memory_list = []
             for memory in memories:
-                memory_list.append({
-                    "id": memory.id,
-                    "content": memory.content,
-                    "type": memory.memory_type,
-                    "importance": memory.importance,
-                    "timestamp": memory.timestamp.isoformat(),
-                    "metadata": memory.metadata
-                })
+                memory_list.append(
+                    {
+                        "id": memory.id,
+                        "content": memory.content,
+                        "type": memory.memory_type,
+                        "importance": memory.importance,
+                        "timestamp": memory.timestamp.isoformat(),
+                        "metadata": memory.metadata,
+                    }
+                )
 
             return memory_list
 
@@ -428,18 +448,14 @@ class NPCAgentManager:
             return {
                 "affinity": 50.0,
                 "level": "熟悉",
-                "modifier": "礼貌友善,正常交流,保持专业"
+                "modifier": "礼貌友善,正常交流,保持专业",
             }
 
         affinity = self.relationship_manager.get_affinity(npc_name, player_id)
         level = self.relationship_manager.get_affinity_level(affinity)
         modifier = self.relationship_manager.get_affinity_modifier(affinity)
 
-        return {
-            "affinity": affinity,
-            "level": level,
-            "modifier": modifier
-        }
+        return {"affinity": affinity, "level": level, "modifier": modifier}
 
     def get_all_affinities(self, player_id: str = "player") -> Dict[str, Dict]:
         """获取所有NPC的好感度信息
@@ -455,7 +471,9 @@ class NPCAgentManager:
 
         return self.relationship_manager.get_all_affinities(player_id)
 
-    def set_npc_affinity(self, npc_name: str, affinity: float, player_id: str = "player"):
+    def set_npc_affinity(
+        self, npc_name: str, affinity: float, player_id: str = "player"
+    ):
         """设置NPC对玩家的好感度 (用于测试)
 
         Args:
@@ -471,8 +489,10 @@ class NPCAgentManager:
         level = self.relationship_manager.get_affinity_level(affinity)
         print(f"✅ 已设置{npc_name}对玩家的好感度: {affinity:.1f} ({level})")
 
+
 # 全局单例
 _npc_manager = None
+
 
 def get_npc_manager() -> NPCAgentManager:
     """获取NPC管理器单例"""
@@ -480,4 +500,3 @@ def get_npc_manager() -> NPCAgentManager:
     if _npc_manager is None:
         _npc_manager = NPCAgentManager()
     return _npc_manager
-

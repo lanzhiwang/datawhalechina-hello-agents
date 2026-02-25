@@ -26,7 +26,7 @@ print("=" * 70)
 fs_tool = MCPTool(
     name="filesystem",  # 指定唯一名称
     description="访问本地文件系统",
-    server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."]
+    server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."],
 )
 agent.add_tool(fs_tool)
 
@@ -35,7 +35,7 @@ agent.add_tool(fs_tool)
 custom_tool = MCPTool(
     name="custom_server",  # 使用不同的名称
     description="自定义业务逻辑服务器",
-    server_command=["python", "my_mcp_server.py"]
+    server_command=["python", "my_mcp_server.py"],
 )
 agent.add_tool(custom_tool)
 

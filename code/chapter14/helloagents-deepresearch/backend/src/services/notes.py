@@ -14,7 +14,9 @@ def build_note_guidance(task: TodoItem) -> str:
     tags_literal = json.dumps(tags_list, ensure_ascii=False)
 
     if task.note_id:
-        read_payload = json.dumps({"action": "read", "note_id": task.note_id}, ensure_ascii=False)
+        read_payload = json.dumps(
+            {"action": "read", "note_id": task.note_id}, ensure_ascii=False
+        )
         update_payload = json.dumps(
             {
                 "action": "update",
@@ -56,4 +58,3 @@ def build_note_guidance(task: TodoItem) -> str:
         "- 创建成功后记录返回的 note_id，并在后续所有更新中复用。\n"
         "- 同步笔记后，再输出面向用户的总结。\n"
     )
-
