@@ -16,10 +16,10 @@ def cosine_similarity(vec1, vec2):
 
 
 # king - man + woman
-result_vec = embeddings["king"] - embeddings["man"] + embeddings["woman"]
+result_vec = embeddings["king"] - embeddings["man"] + embeddings["woman"]  # array([0.9, 0.2])
 
 # 计算结果向量与 "queen" 的相似度
-sim = cosine_similarity(result_vec, embeddings["queen"])
+sim = cosine_similarity(result_vec, embeddings["queen"])  # 1.0
 
 print(f"king - man + woman 的结果向量: {result_vec}")
 print(f"该结果与 'queen' 的相似度: {sim:.4f}")

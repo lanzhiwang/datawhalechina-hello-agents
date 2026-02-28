@@ -68,6 +68,7 @@ class MultiHeadAttention(nn.Module):
 class PositionWiseFeedForward(nn.Module):
     """
     位置前馈网络模块
+    逐位置前馈网络(Position-wise Feed-Forward Network, FFN)
     """
 
     def __init__(self, d_model, d_ff, dropout=0.1):
@@ -128,8 +129,8 @@ class EncoderLayer(nn.Module):
         super(EncoderLayer, self).__init__()
         self.self_attn = MultiHeadAttention(d_model, num_heads)
         self.feed_forward = PositionWiseFeedForward(d_model, d_ff, dropout)
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
+        self.norm1 = nn.LayerNorm(d_model)  # 残差连接与层归一化
+        self.norm2 = nn.LayerNorm(d_model)  # 残差连接与层归一化
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, mask):
@@ -154,9 +155,9 @@ class DecoderLayer(nn.Module):
         self.self_attn = MultiHeadAttention(d_model, num_heads)
         self.cross_attn = MultiHeadAttention(d_model, num_heads)
         self.feed_forward = PositionWiseFeedForward(d_model, d_ff, dropout)
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
-        self.norm3 = nn.LayerNorm(d_model)
+        self.norm1 = nn.LayerNorm(d_model)  # 残差连接与层归一化
+        self.norm2 = nn.LayerNorm(d_model)  # 残差连接与层归一化
+        self.norm3 = nn.LayerNorm(d_model)  # 残差连接与层归一化
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
