@@ -69,7 +69,7 @@ if __name__ == "__main__":
         exampleMessages = [
             {
                 "role": "system",
-                "content": "You are a helpful assistant that writes Python code.",
+                "content": "You are a helpful assistant that writes Python code.",  # 你是一位乐于助人的助手，会编写Python代码。
             },
             {"role": "user", "content": "写一个快速排序算法"},
         ]
